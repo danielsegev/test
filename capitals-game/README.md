@@ -13,6 +13,8 @@ Open `index.html` in a browser. No build step or dependencies.
 - **Passport:** the first time you name a country's capital correctly, it gets a stamp. The passport view shows all 194 countries by region
 - **Friends board:** everyone's passport ranked by stamps (ties go to flights boarded), with accuracy, km flown and best streak
 - **Selfie postcards:** once you have a city's stamp, you can make a postcard from it. Take a selfie or choose a photo, drag and zoom it into the polaroid, pick day, sunset or night, and save it as a PNG. Each capital gets a skyline drawn from its name, with building styles that depend on the region. The photo never leaves the device
+- **Fun facts:** 388 short facts, two per country: one about the capital and one about the country. One appears after every answer
+- **Layover and review:** the trip summary lists the flights you missed, with their facts, and offers an instant retry. Missed capitals come back in later trips (up to 40% of a trip) until you answer them correctly twice
 - Best score per route is saved in the browser
 
 ## Competing with friends

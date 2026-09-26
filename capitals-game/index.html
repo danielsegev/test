@@ -607,7 +607,785 @@ Tuvalu|Funafuti|-8.52|179.20||
 Vanuatu|Port Vila|-17.73|168.32||`
 };
 
-const FACTS = {}; /*FACTS*/
+// Two short facts per country: [about the capital, about the country].
+const FACTS = {
+"Algeria": [
+"Algiers is nicknamed \"Algiers the White\" for its whitewashed buildings rising above the Mediterranean.",
+"The Sahara Desert covers most of Algeria's territory."
+],
+"Angola": [
+"Luanda was founded by the Portuguese in 1576 on Angola's Atlantic coast.",
+"The giant sable antelope, found only in Angola, is a national symbol and gives the national football team its nickname."
+],
+"Benin": [
+"Porto-Novo means \"New Port\" in Portuguese.",
+"Benin was known as Dahomey, after a historic West African kingdom, until 1975."
+],
+"Botswana": [
+"Gaborone is named after Chief Gaborone and was built largely from scratch to become the capital at independence in 1966.",
+"The Okavango River spreads into a vast inland delta in the Kalahari Desert instead of reaching the sea."
+],
+"Burkina Faso": [
+"Ouagadougou hosts FESPACO, a major pan-African film festival held every two years.",
+"The name Burkina Faso is often translated as \"land of upright people\", and the country was called Upper Volta until 1984."
+],
+"Burundi": [
+"Gitega replaced Bujumbura as Burundi's political capital in 2019.",
+"Burundi's royal drum dance is listed by UNESCO as an Intangible Cultural Heritage of Humanity."
+],
+"Cabo Verde": [
+"Praia means \"beach\" in Portuguese and sits on the island of Santiago.",
+"Cabo Verde is an archipelago of ten volcanic islands and the home of morna, a soulful music style."
+],
+"Cameroon": [
+"Yaoundé began as a German outpost founded in 1889 in the hills of south-central Cameroon.",
+"Cameroon is often called \"Africa in miniature\" because of its wide variety of landscapes and cultures."
+],
+"Central African Republic": [
+"Bangui sits on the Ubangi River, which forms the border with DR Congo.",
+"The Dzanga-Sangha reserve is famous for forest elephants gathering in a large forest clearing."
+],
+"Chad": [
+"N'Djamena was called Fort-Lamy until 1973 and lies where the Chari and Logone rivers meet.",
+"Chad is named after Lake Chad, a large shallow lake on its western border."
+],
+"Comoros": [
+"Moroni lies on Grande Comore island near Mount Karthala, an active volcano.",
+"Comoros is nicknamed the \"Perfume Islands\" for its ylang-ylang flowers, whose oil is used in perfumes."
+],
+"DR Congo": [
+"Kinshasa was called Léopoldville until 1966 and faces Brazzaville across the Congo River.",
+"The okapi, a forest animal related to the giraffe, lives in the wild only in DR Congo."
+],
+"Republic of the Congo": [
+"Brazzaville is named after the explorer Pierre Savorgnan de Brazza.",
+"The country's rainforests are home to western lowland gorillas, notably in Odzala-Kokoua National Park."
+],
+"Djibouti": [
+"Djibouti City gave its name to the country, which is why the capital and country share the same name.",
+"Lake Assal in Djibouti is the lowest point in Africa, lying more than 150 metres below sea level."
+],
+"Egypt": [
+"Cairo's Arabic name, al-Qahira, means \"the Victorious\".",
+"The Great Pyramid of Giza is the only one of the Seven Wonders of the Ancient World still standing."
+],
+"Equatorial Guinea": [
+"Malabo lies on Bioko Island rather than on the mainland and was once called Santa Isabel.",
+"Equatorial Guinea is the only country in Africa with Spanish as an official language."
+],
+"Eritrea": [
+"Asmara's modernist Italian-era architecture earned it UNESCO World Heritage status in 2017.",
+"Eritrea's Red Sea coast includes the Dahlak Archipelago, a group of many islands surrounded by coral reefs."
+],
+"Eswatini": [
+"Mbabane is the administrative capital, while nearby Lobamba is the royal and legislative capital.",
+"The country changed its name from Swaziland to Eswatini in 2018."
+],
+"Ethiopia": [
+"Addis Ababa means \"new flower\" in Amharic and was founded in 1886 by Emperor Menelik II and Empress Taytu.",
+"Ethiopia uses its own calendar, which runs about seven to eight years behind the Gregorian calendar."
+],
+"Gabon": [
+"Libreville means \"free town\" in French and was founded in 1849 as a settlement for freed slaves.",
+"In Gabon's Loango National Park, elephants and other animals can sometimes be seen on the beaches."
+],
+"Gambia": [
+"Banjul sits on an island at the mouth of the Gambia River and was called Bathurst until 1973.",
+"Gambia is the smallest country on mainland Africa and is almost entirely surrounded by Senegal."
+],
+"Ghana": [
+"Accra's Independence Square and Black Star Gate celebrate Ghana's independence in 1957.",
+"Ghana is famous for kente, a colorful woven cloth traditionally made by the Ashanti and Ewe peoples."
+],
+"Guinea": [
+"Conakry was first built on Tombo Island and later spread onto the Kaloum Peninsula.",
+"Guinea is called the \"water tower of West Africa\" because the Niger, Senegal and Gambia rivers rise there."
+],
+"Guinea-Bissau": [
+"Bissau lies on the estuary of the Geba River near the Atlantic coast.",
+"The Bijagós Archipelago off Guinea-Bissau is a UNESCO biosphere reserve where hippos swim in salt water."
+],
+"Côte d'Ivoire": [
+"Yamoussoukro became the capital in 1983 and is home to the huge Basilica of Our Lady of Peace.",
+"Côte d'Ivoire is one of the world's top producers of cocoa beans, the main ingredient in chocolate."
+],
+"Kenya": [
+"Nairobi's name comes from a Maasai phrase meaning \"cool water\", and it has a national park within city limits.",
+"Kenya's Maasai Mara hosts part of the Great Migration of wildebeest and zebras each year."
+],
+"Lesotho": [
+"Maseru's name means \"place of red sandstones\" in Sesotho.",
+"Lesotho is entirely surrounded by South Africa, and all of its land lies above 1,000 metres."
+],
+"Liberia": [
+"Monrovia is named after James Monroe, the fifth President of the United States.",
+"Liberia declared independence in 1847, making it Africa's oldest republic."
+],
+"Libya": [
+"Tripoli's name comes from the Greek for \"three cities\" and its Red Castle overlooks the harbor.",
+"Libya's Leptis Magna holds some of the best-preserved Roman ruins in the Mediterranean."
+],
+"Madagascar": [
+"Antananarivo means \"City of the Thousand\", traditionally said to refer to a thousand warriors.",
+"Lemurs are found in the wild only on Madagascar."
+],
+"Malawi": [
+"Lilongwe replaced Zomba as the capital of Malawi in 1975.",
+"Lake Malawi is home to hundreds of species of colorful cichlid fish found nowhere else."
+],
+"Mali": [
+"Bamako lies on the banks of the Niger River.",
+"Mali's Great Mosque of Djenné is a huge mud-brick building that the community replasters every year."
+],
+"Mauritania": [
+"Nouakchott grew from a small village into a planned capital built for Mauritania's independence in 1960.",
+"The Richat Structure, a giant ring formation known as the \"Eye of the Sahara\", is in Mauritania."
+],
+"Mauritius": [
+"Port Louis is named after King Louis XV of France.",
+"The dodo, a flightless bird, lived only on Mauritius and died out in the 17th century."
+],
+"Morocco": [
+"Rabat's Hassan Tower is the unfinished minaret of a grand 12th-century mosque.",
+"Morocco's University of al-Qarawiyyin in Fez, founded in 859, is often cited as the oldest operating university."
+],
+"Mozambique": [
+"Maputo was called Lourenço Marques until it was renamed in 1976.",
+"The Island of Mozambique, a UNESCO World Heritage Site, gave the whole country its name."
+],
+"Namibia": [
+"Windhoek's Christuskirche, a Lutheran church completed in 1910, is a landmark from the German colonial era.",
+"Namibia's Namib Desert is considered one of the oldest deserts on Earth, famous for its red dunes at Sossusvlei."
+],
+"Niger": [
+"Niamey sits on the Niger River, the river that gives the country its name.",
+"The Tree of Ténéré, once called the most isolated tree on Earth, stood in Niger's Sahara until 1973."
+],
+"Nigeria": [
+"Abuja was built as a planned city and replaced Lagos as Nigeria's capital in 1991.",
+"Nigeria's film industry, known as Nollywood, is one of the most prolific in the world."
+],
+"Rwanda": [
+"Kigali became Rwanda's capital when the country gained independence in 1962.",
+"Rwanda is nicknamed the \"land of a thousand hills\" for its green, rolling landscape."
+],
+"São Tomé and Príncipe": [
+"São Tomé is named after Saint Thomas, as Portuguese sailors reached the island on his feast day.",
+"The equator passes through Ilhéu das Rolas, a small islet just off São Tomé island."
+],
+"Senegal": [
+"Dakar lies on the Cap-Vert peninsula, which includes the westernmost point of mainland Africa.",
+"Senegal's Lake Retba, known as Lac Rose, can appear pink because of algae in its salty water."
+],
+"Seychelles": [
+"Victoria, on the island of Mahé, is named after Queen Victoria.",
+"The coco de mer palm of Seychelles produces the largest seed in the plant kingdom."
+],
+"Sierra Leone": [
+"Freetown was founded in 1792 as a settlement for formerly enslaved people.",
+"Sierra Leone's name comes from the Portuguese for \"Lion Mountains\"."
+],
+"Somalia": [
+"Mogadishu has been a trading port for centuries and was visited by the traveler Ibn Battuta in 1331.",
+"Somalia has the longest coastline of any country on mainland Africa."
+],
+"South Africa": [
+"Pretoria is nicknamed the \"Jacaranda City\" for the purple jacaranda trees that bloom there each spring.",
+"South Africa has three capital cities: Pretoria, Cape Town and Bloemfontein."
+],
+"South Sudan": [
+"Juba lies on the banks of the White Nile.",
+"South Sudan is home to the Sudd, one of the world's largest wetlands, formed by the White Nile."
+],
+"Sudan": [
+"Khartoum lies where the Blue Nile and the White Nile meet to form the Nile.",
+"Sudan is home to the ancient pyramids of Meroë, built by the Kingdom of Kush."
+],
+"Tanzania": [
+"Dodoma was chosen as Tanzania's capital in 1973, though Dar es Salaam remains the largest city.",
+"Tanzania is home to Mount Kilimanjaro, the highest mountain in Africa."
+],
+"Togo": [
+"Lomé sits on the Atlantic coast right next to the border with Ghana.",
+"Togo's Koutammakou region is a UNESCO site known for the Batammariba people's tower-like mud houses."
+],
+"Tunisia": [
+"Tunis lies close to the ruins of ancient Carthage, and its old medina is a UNESCO World Heritage Site.",
+"Scenes for the planet Tatooine in the first Star Wars film were shot in Tunisia."
+],
+"Uganda": [
+"Kampala's name is traditionally said to come from a phrase meaning \"hill of the impala\".",
+"Uganda's Bwindi Impenetrable National Park is home to many of the world's mountain gorillas."
+],
+"Zambia": [
+"Lusaka became the capital of Northern Rhodesia in 1935, replacing Livingstone.",
+"Zambia shares Victoria Falls, known locally as Mosi-oa-Tunya or \"the smoke that thunders\", with Zimbabwe."
+],
+"Zimbabwe": [
+"Harare was called Salisbury until it was renamed in 1982.",
+"Zimbabwe is named after Great Zimbabwe, the ruins of a medieval stone city."
+],
+"Antigua and Barbuda": [
+"St. John's is the largest city of Antigua and Barbuda and sits on a sheltered harbour on the northwest coast of Antigua.",
+"Nelson's Dockyard, an 18th-century British naval base in Antigua, is a UNESCO World Heritage Site."
+],
+"Argentina": [
+"The name Buenos Aires means \"good airs\" or \"fair winds\" in Spanish.",
+"Aconcagua in Argentina is the highest mountain in the Americas."
+],
+"Bahamas": [
+"Nassau, on the island of New Providence, is named after King William III of England, who came from the House of Orange-Nassau.",
+"Christopher Columbus made his first landfall in the Americas in 1492 on an island in the Bahamas."
+],
+"Barbados": [
+"Historic Bridgetown and its Garrison were named a UNESCO World Heritage Site in 2011.",
+"The flying fish is a national symbol of Barbados and features in its national dish, cou-cou and flying fish."
+],
+"Belize": [
+"Belmopan was built as a new inland capital after Hurricane Hattie devastated Belize City in 1961.",
+"Belize is the only Central American country where English is the official language."
+],
+"Bolivia": [
+"Sucre is named after independence hero Antonio José de Sucre and is nicknamed the White City for its whitewashed buildings.",
+"Bolivia's Salar de Uyuni is the largest salt flat in the world."
+],
+"Brazil": [
+"Brasília was built from scratch and inaugurated in 1960, with buildings designed by architect Oscar Niemeyer.",
+"Brazil is the only country in South America whose official language is Portuguese."
+],
+"Canada": [
+"Queen Victoria chose Ottawa as the capital of the Province of Canada in 1857.",
+"Canada has the longest coastline of any country in the world."
+],
+"Chile": [
+"Santiago was founded in 1541 by the Spanish conquistador Pedro de Valdivia.",
+"Chile's Atacama Desert is one of the driest places on Earth."
+],
+"Colombia": [
+"Bogotá sits high in the Andes at about 2,600 metres above sea level.",
+"Colombia is the only South American country with coastlines on both the Pacific Ocean and the Caribbean Sea."
+],
+"Costa Rica": [
+"San José became the capital of Costa Rica in 1823, taking over from the older city of Cartago.",
+"Costa Rica abolished its army in 1948."
+],
+"Cuba": [
+"Old Havana and its colonial fortifications are a UNESCO World Heritage Site.",
+"Cuba is the largest island in the Caribbean."
+],
+"Dominica": [
+"Roseau takes its name from the French word for the reeds that once grew along the nearby river.",
+"Dominica is nicknamed the Nature Island of the Caribbean for its rainforests, rivers and waterfalls."
+],
+"Dominican Republic": [
+"Santo Domingo's Colonial City is home to the Cathedral of Santa María la Menor, the oldest cathedral in the Americas.",
+"Pico Duarte in the Dominican Republic is the highest mountain in the Caribbean."
+],
+"Ecuador": [
+"In 1978 Quito's historic center was among the very first places named UNESCO World Heritage Sites.",
+"Ecuador is named after the equator, which runs through the country."
+],
+"El Salvador": [
+"San Salvador means \"Holy Saviour\" in Spanish, and the city lies at the foot of the San Salvador volcano.",
+"El Salvador is the only Central American country without a Caribbean coastline."
+],
+"Grenada": [
+"St. George's is built around a horseshoe-shaped harbour overlooked by the 18th-century Fort George.",
+"Grenada is nicknamed the Island of Spice, and a nutmeg appears on its national flag."
+],
+"Guatemala": [
+"Guatemala City became the capital after earthquakes in 1773 badly damaged the old capital, now called Antigua Guatemala.",
+"Tikal, a great ancient Maya city in Guatemala's rainforest, is a UNESCO World Heritage Site."
+],
+"Guyana": [
+"Georgetown was named in honour of King George III of Great Britain.",
+"Guyana is the only South American country where English is the official language."
+],
+"Haiti": [
+"Port-au-Prince means \"Port of the Prince\" in French.",
+"Haiti declared independence in 1804, becoming the first independent nation in Latin America and the Caribbean."
+],
+"Honduras": [
+"Tegucigalpa became the permanent capital of Honduras in 1880, replacing the colonial city of Comayagua.",
+"The ancient Maya city of Copán in Honduras is famous for its carved stone monuments and is a UNESCO World Heritage Site."
+],
+"Jamaica": [
+"Kingston grew after a 1692 earthquake destroyed nearby Port Royal, and it became Jamaica's capital in 1872.",
+"Reggae music was born in Jamaica."
+],
+"Mexico": [
+"Mexico City was built on the ruins of Tenochtitlan, the Aztec capital that stood on an island in Lake Texcoco.",
+"Maize, or corn, was first domesticated in southern Mexico thousands of years ago."
+],
+"Nicaragua": [
+"Managua was chosen as the capital in 1852 as a compromise between the rival cities of León and Granada.",
+"Lake Nicaragua is the largest lake in Central America."
+],
+"Panama": [
+"Panamá Viejo, the ruins of the original Panama City founded in 1519, is a UNESCO World Heritage Site.",
+"The Panama Canal, which links the Atlantic and Pacific Oceans, opened in 1914."
+],
+"Paraguay": [
+"Asunción is named after the Feast of the Assumption, the day in 1537 when the settlement was founded.",
+"Guaraní, an Indigenous language, is an official language of Paraguay alongside Spanish."
+],
+"Peru": [
+"Lima was founded by Francisco Pizarro in 1535 and was originally called the City of Kings.",
+"The Inca citadel of Machu Picchu sits high in Peru's Andes Mountains."
+],
+"Saint Kitts and Nevis": [
+"Basseterre is a French name meaning \"low land\".",
+"Alexander Hamilton, a founding father of the United States, was born on the island of Nevis."
+],
+"Saint Lucia": [
+"Castries is named after the Marquis de Castries, an 18th-century French naval minister.",
+"The Pitons, two steep volcanic peaks on Saint Lucia's coast, are a UNESCO World Heritage Site."
+],
+"Saint Vincent and the Grenadines": [
+"Kingstown's Botanical Gardens, founded in 1765, are among the oldest botanical gardens in the Americas.",
+"La Soufrière, an active volcano, is the highest peak on the island of Saint Vincent."
+],
+"Suriname": [
+"The historic inner city of Paramaribo, known for its Dutch colonial wooden buildings, is a UNESCO World Heritage Site.",
+"Suriname is the only country in South America where Dutch is the official language."
+],
+"Trinidad and Tobago": [
+"Port of Spain's Queen's Park Savannah is a large open park at the heart of the city's famous Carnival.",
+"The steelpan, a drum made from an oil barrel, was invented in Trinidad and Tobago."
+],
+"United States": [
+"Washington, D.C. is named after George Washington, and its street plan was designed by Pierre L'Enfant.",
+"Yellowstone, established in 1872, was the first national park in the world."
+],
+"Uruguay": [
+"Montevideo hosted the first FIFA World Cup final in 1930, at the Estadio Centenario.",
+"Mate, an herbal tea sipped through a metal straw from a gourd, is a beloved everyday drink in Uruguay."
+],
+"Venezuela": [
+"Caracas is the birthplace of Simón Bolívar, the hero of South American independence.",
+"Venezuela's Angel Falls is the highest uninterrupted waterfall in the world."
+],
+"Australia": [
+"Canberra was purpose-built as a compromise capital between rivals Sydney and Melbourne.",
+"Australia's Great Barrier Reef is the largest coral reef system in the world."
+],
+"Fiji": [
+"Suva became the capital of Fiji in 1882, replacing the old town of Levuka.",
+"Fiji is made up of more than 300 islands in the South Pacific."
+],
+"Kiribati": [
+"South Tarawa lies on Tarawa, a coral atoll where a major World War II battle was fought in 1943.",
+"Kiribati is the only country that lies in all four hemispheres, north, south, east and west."
+],
+"Marshall Islands": [
+"Majuro is a coral atoll, a ring of low islands surrounding a large lagoon.",
+"Traditional Marshallese navigators used stick charts to map ocean swells between islands."
+],
+"Micronesia": [
+"Palikir, on the island of Pohnpei, replaced nearby Kolonia as the capital in 1989.",
+"On the Micronesian island of Yap, large carved stone discs called rai have traditionally been used as money."
+],
+"Nauru": [
+"Nauru has no official capital, but its parliament and government offices are in Yaren District.",
+"Nauru is the smallest island country in the world."
+],
+"New Zealand": [
+"Wellington replaced Auckland as the capital of New Zealand in 1865.",
+"In 1893 New Zealand became the first self-governing country where women could vote in national elections."
+],
+"Palau": [
+"Ngerulmud, on the island of Babeldaob, replaced Koror as Palau's capital in 2006.",
+"Palau's Rock Islands Southern Lagoon, with hundreds of green limestone islands, is a UNESCO World Heritage Site."
+],
+"Papua New Guinea": [
+"Port Moresby was named by British captain John Moresby in 1873 in honour of his father, Admiral Fairfax Moresby.",
+"Papua New Guinea has more than 800 languages, more than any other country."
+],
+"Samoa": [
+"Writer Robert Louis Stevenson lived near Apia and is buried on Mount Vaea overlooking the town.",
+"In 2011 Samoa skipped December 30 entirely when it moved to the west side of the International Date Line."
+],
+"Solomon Islands": [
+"Honiara is on the island of Guadalcanal and grew around facilities built there during World War II.",
+"East Rennell in the Solomon Islands, part of the world's largest raised coral atoll, is a UNESCO World Heritage Site."
+],
+"Tonga": [
+"The Royal Palace in Nukuʻalofa is a white wooden building dating from 1867.",
+"Tonga is made up of about 170 islands, and it is still ruled by a king today."
+],
+"Tuvalu": [
+"Funafuti is a narrow coral atoll ringing a wide lagoon, and its airstrip was first built during World War II.",
+"Tuvalu earns valuable income from leasing its internet domain name, .tv."
+],
+"Vanuatu": [
+"Port Vila lies on a bay of Efate island and has been Vanuatu's capital since independence in 1980.",
+"The land diving ritual of Vanuatu's Pentecost Island helped inspire modern bungee jumping."
+],
+"Afghanistan": [
+"Kabul is home to the Gardens of Babur, where Babur, founder of the Mughal Empire, is buried.",
+"Afghanistan is a landlocked country, and the Hindu Kush mountains stretch across much of it."
+],
+"Armenia": [
+"Yerevan began as the fortress of Erebuni, founded in 782 BC, and many of its buildings are made of pinkish volcanic tuff stone.",
+"Armenia is traditionally regarded as the first country to adopt Christianity as its state religion, in 301 AD."
+],
+"Azerbaijan": [
+"Baku lies on the Caspian Sea about 28 metres below sea level, making it the lowest-lying national capital in the world.",
+"Azerbaijan is called the Land of Fire, partly because of natural gas flames like Yanar Dag that burn continuously on a hillside."
+],
+"Bahrain": [
+"Manama sits on the northeastern tip of Bahrain Island, where the historic Bab al-Bahrain gateway marks the entrance to its old souq.",
+"Bahrain is an island nation linked to Saudi Arabia by the King Fahd Causeway, which opened in 1986."
+],
+"Bangladesh": [
+"Dhaka is nicknamed the City of Mosques and is famous for its colorful, hand-painted cycle rickshaws.",
+"The Sundarbans, the largest mangrove forest in the world, is shared by Bangladesh and India and is home to Bengal tigers."
+],
+"Bhutan": [
+"Thimphu is famous for having no traffic lights, with police officers directing traffic by hand at busy junctions.",
+"Bhutan measures its progress using Gross National Happiness rather than focusing only on economic growth."
+],
+"Brunei": [
+"Bandar Seri Begawan is home to Kampong Ayer, a historic water village of houses built on stilts over the Brunei River.",
+"Brunei lies on the island of Borneo, which it shares with Malaysia and Indonesia."
+],
+"Cambodia": [
+"Phnom Penh means Penh's Hill, after a legendary woman named Penh who placed Buddha statues found in the river on a hill.",
+"The temple of Angkor Wat is so central to Cambodian identity that it appears on the national flag."
+],
+"China": [
+"Beijing means Northern Capital, and its Forbidden City was the imperial palace of the Ming and Qing dynasties.",
+"The giant panda lives in the wild only in the mountain forests of central China."
+],
+"Georgia": [
+"Tbilisi takes its name from the Georgian word for warm, after the natural hot sulfur springs found in the city.",
+"Georgia has an ancient winemaking tradition using large clay jars called qvevri, which UNESCO recognizes as cultural heritage."
+],
+"India": [
+"New Delhi was designed by British architects Edwin Lutyens and Herbert Baker and was inaugurated as the capital in 1931.",
+"Chess is believed to have originated in India from an ancient game called chaturanga."
+],
+"Indonesia": [
+"Jakarta was known as Batavia when it was the center of Dutch colonial rule in the East Indies.",
+"Komodo dragons, the largest living lizards, are found in the wild only on a few Indonesian islands."
+],
+"Iran": [
+"Tehran sits at the foot of the Alborz mountains, and on clear days Mount Damavand, Iran's highest peak, can be seen from the city.",
+"The ruins of Persepolis, the ceremonial capital of the ancient Achaemenid Persian Empire, are a UNESCO World Heritage Site."
+],
+"Iraq": [
+"Baghdad was founded in 762 AD by the Abbasid caliph al-Mansur, who designed it as a perfectly round city.",
+"Iraq includes ancient Mesopotamia, the land between the Tigris and Euphrates rivers where cuneiform writing developed."
+],
+"Israel": [
+"Jerusalem's Old City is enclosed by stone walls built in the 1500s under the Ottoman sultan Suleiman the Magnificent.",
+"The shore of the Dead Sea is the lowest point on land on Earth, and its water is so salty that swimmers float easily."
+],
+"Japan": [
+"Tokyo was once called Edo and was renamed Tokyo, meaning Eastern Capital, in 1868.",
+"Mount Fuji, Japan's highest mountain, is an active volcano that last erupted in 1707."
+],
+"Jordan": [
+"Amman was known as Philadelphia in Greco-Roman times, and a large Roman theater still stands in its downtown.",
+"The ancient city of Petra in Jordan was carved into rose-colored sandstone cliffs by the Nabataeans."
+],
+"Kazakhstan": [
+"Astana simply means capital in Kazakh, and the city replaced Almaty as the country's capital in 1997.",
+"Kazakhstan is the largest landlocked country in the world."
+],
+"Kuwait": [
+"Kuwait City is known for the Kuwait Towers, three slender towers opened in 1979, two of which carry blue-green spheres.",
+"The name Kuwait comes from an Arabic word meaning a small fortress."
+],
+"Kyrgyzstan": [
+"Bishkek was called Frunze during much of the Soviet era and took back the name Bishkek in 1991.",
+"Lake Issyk-Kul, high in Kyrgyzstan's mountains, is slightly salty and does not freeze in winter."
+],
+"Laos": [
+"Vientiane sits on the banks of the Mekong River, and its golden stupa Pha That Luang is a national symbol of Laos.",
+"Laos is the only landlocked country in Southeast Asia."
+],
+"Lebanon": [
+"Beirut is one of the world's oldest cities and is mentioned in ancient Egyptian letters from the 14th century BC.",
+"The cedar tree is a national symbol of Lebanon and appears in the center of its flag."
+],
+"Malaysia": [
+"Kuala Lumpur means muddy confluence in Malay, because it grew where the Klang and Gombak rivers meet.",
+"Malaysia is split into two parts by the South China Sea, with one part on the Malay Peninsula and the other on Borneo."
+],
+"Maldives": [
+"Malé's Old Friday Mosque was built from carved coral stone in 1658.",
+"The Maldives is the lowest-lying country in the world, with most of its land only a metre or two above sea level."
+],
+"Mongolia": [
+"Ulaanbaatar means Red Hero and is known as the coldest national capital in the world.",
+"Genghis Khan united the Mongol tribes in 1206 and founded the largest contiguous land empire in history."
+],
+"Myanmar": [
+"Naypyidaw, whose name means royal capital, was built as a new city and replaced Yangon as the capital in the mid-2000s.",
+"The ancient city of Bagan in Myanmar is dotted with more than two thousand Buddhist temples and pagodas."
+],
+"Nepal": [
+"Kathmandu is thought to be named after Kasthamandap, a wooden pavilion said to have been built from the timber of a single tree.",
+"Nepal has the only national flag in the world that is not a rectangle or square."
+],
+"North Korea": [
+"Pyongyang lies on the Taedong River, and its name means flat land.",
+"Mount Paektu, the highest mountain on the Korean Peninsula, is a volcano with a crater lake called Heaven Lake."
+],
+"Oman": [
+"Muscat's harbor is guarded by Al Jalali and Al Mirani, two forts built by the Portuguese in the 16th century.",
+"Oman has been famous for its frankincense trade for thousands of years."
+],
+"Pakistan": [
+"Islamabad was built as a planned city in the 1960s, and its Faisal Mosque stands at the foot of the Margalla Hills.",
+"Mohenjo-daro in Pakistan was one of the largest cities of the ancient Indus Valley Civilization."
+],
+"Philippines": [
+"Manila's Intramuros is a historic walled city built by the Spanish during the colonial era.",
+"The Philippines is made up of more than 7,000 islands."
+],
+"Qatar": [
+"Doha is home to the Museum of Islamic Art, designed by the famous architect I. M. Pei.",
+"In 2022, Qatar became the first Arab country to host the FIFA World Cup."
+],
+"Saudi Arabia": [
+"Riyadh's name comes from the Arabic word for gardens, and its old Masmak Fortress is built of mud brick.",
+"The Rub al Khali, or Empty Quarter, in Saudi Arabia is one of the largest sand deserts in the world."
+],
+"Singapore": [
+"Singapore's name comes from the Sanskrit Singapura, meaning Lion City.",
+"The Singapore Botanic Gardens became the country's first UNESCO World Heritage Site in 2015."
+],
+"South Korea": [
+"Seoul's Gyeongbokgung Palace was built in 1395 as the main royal palace of the Joseon dynasty.",
+"The Korean alphabet, Hangul, was created in the 15th century under King Sejong the Great."
+],
+"Sri Lanka": [
+"Sri Jayawardenepura Kotte is home to Sri Lanka's Parliament, which stands on an island in a lake, while Colombo is the commercial capital.",
+"Sri Lanka was known as Ceylon until 1972 and is famous around the world for its Ceylon tea."
+],
+"Syria": [
+"Damascus is one of the oldest continuously inhabited cities in the world, and damask fabric is named after it.",
+"The golden hamster, a popular pet, originally came from the area around Aleppo in Syria."
+],
+"Tajikistan": [
+"Dushanbe means Monday in Tajik, after a busy market that was held there on Mondays.",
+"More than 90 percent of Tajikistan is mountainous, including part of the Pamirs, nicknamed the Roof of the World."
+],
+"Thailand": [
+"Bangkok is called Krung Thep by Thai people, and its full ceremonial name is one of the longest place names in the world.",
+"Thailand is the only country in Southeast Asia that was never colonized by a European power."
+],
+"Timor-Leste": [
+"Dili is overlooked by the Cristo Rei statue, which stands on a headland at the eastern end of the bay.",
+"Timor-Leste shares the island of Timor with Indonesia and became an independent country in 2002."
+],
+"Turkey": [
+"Ankara was once known as Angora, the name later given to Angora goats, cats and rabbits.",
+"Turkey spans two continents, with land in both Europe and Asia."
+],
+"Turkmenistan": [
+"Ashgabat is famous for its many gleaming white marble buildings.",
+"Turkmenistan is famous for Akhal-Teke horses, which are known for their shimmering metallic coats."
+],
+"United Arab Emirates": [
+"Abu Dhabi is home to the Sheikh Zayed Grand Mosque, known for its white marble domes and huge chandeliers.",
+"The United Arab Emirates is a federation of seven emirates that united in 1971."
+],
+"Uzbekistan": [
+"Tashkent means stone city, and much of it was rebuilt after a major earthquake in 1966.",
+"Uzbekistan is one of only two doubly landlocked countries, meaning it is surrounded entirely by other landlocked countries."
+],
+"Vietnam": [
+"Hanoi's Hoan Kiem Lake, meaning Lake of the Returned Sword, is linked to a legend of a golden turtle reclaiming a magic sword.",
+"Ha Long Bay in Vietnam is famous for its thousands of limestone islands rising from emerald water."
+],
+"Yemen": [
+"Sanaa's Old City is a UNESCO World Heritage Site famous for its tall tower houses decorated with white geometric patterns.",
+"The Yemeni island of Socotra is home to the unusual umbrella-shaped dragon's blood tree."
+],
+"Albania": [
+"Tirana was founded in 1614 and became the capital of Albania in 1920.",
+"Albanians call their country Shqipëria, often translated as Land of the Eagles."
+],
+"Andorra": [
+"Andorra la Vella is the highest capital city in Europe, sitting over 1,000 meters up in the Pyrenees.",
+"Andorra has two co-princes as joint heads of state: the Bishop of Urgell and the President of France."
+],
+"Austria": [
+"Vienna was home to great composers such as Mozart, Haydn, and Beethoven.",
+"Austria is a landlocked country, and the Alps cover much of its territory."
+],
+"Belarus": [
+"Minsk was largely rebuilt after World War II, giving it wide avenues and grand squares.",
+"Belarus shares the Białowieża Forest, one of Europe's last primeval forests, with Poland."
+],
+"Belgium": [
+"Brussels is home to the Atomium, a giant model of an iron crystal built for the 1958 World's Fair.",
+"Belgium has three official languages: Dutch, French, and German."
+],
+"Bosnia and Herzegovina": [
+"Sarajevo hosted the 1984 Winter Olympic Games.",
+"The Old Bridge in Mostar spans the Neretva River and is a UNESCO World Heritage Site."
+],
+"Bulgaria": [
+"Sofia takes its name from the ancient Saint Sophia Church and sits at the foot of Mount Vitosha.",
+"Bulgaria is famous for its rose oil, produced in the Rose Valley near the town of Kazanlak."
+],
+"Croatia": [
+"Zagreb's historic center grew from two medieval settlements, Gradec and Kaptol.",
+"Croatia has more than a thousand islands and islets along its Adriatic coast."
+],
+"Cyprus": [
+"Nicosia's old city is ringed by star-shaped Venetian walls built in the 16th century.",
+"In Greek mythology, Cyprus is the birthplace of Aphrodite, goddess of love."
+],
+"Czechia": [
+"Prague's astronomical clock was first installed in 1410 and is one of the oldest still working.",
+"The word \"robot\" comes from a 1920 play by the Czech writer Karel Čapek."
+],
+"Denmark": [
+"Copenhagen's name comes from an old Danish phrase meaning merchants' harbor.",
+"LEGO comes from Denmark, and its name is based on the Danish words \"leg godt,\" meaning play well."
+],
+"Estonia": [
+"Tallinn's medieval Old Town is one of the best preserved in Europe and a UNESCO World Heritage Site.",
+"Estonia is known for its digital government and was the first country to offer e-Residency."
+],
+"Finland": [
+"Helsinki was founded in 1550 by King Gustav I of Sweden as a trading town.",
+"Finland is called the land of a thousand lakes, though it actually has many more than that."
+],
+"France": [
+"Paris's Eiffel Tower was built for the 1889 World's Fair and was meant to stand for only 20 years.",
+"The metric system was introduced in France in the 1790s, during the French Revolution."
+],
+"Germany": [
+"Berlin's Brandenburg Gate was completed in 1791 and became a symbol of German reunification.",
+"Johannes Gutenberg developed printing with movable type in Mainz, Germany, around 1450."
+],
+"Greece": [
+"Athens is named after the goddess Athena, and its Acropolis is crowned by the Parthenon.",
+"The ancient Olympic Games began at Olympia in Greece."
+],
+"Hungary": [
+"Budapest was created in 1873 by uniting Buda, Óbuda, and Pest on both banks of the Danube.",
+"The Rubik's Cube was invented in 1974 by the Hungarian architect Ernő Rubik."
+],
+"Iceland": [
+"Reykjavík means \"smoky bay,\" named after steam rising from nearby hot springs.",
+"Iceland's parliament, the Althing, was founded in 930 and is one of the oldest in the world."
+],
+"Ireland": [
+"Dublin's name comes from the Irish \"Dubh Linn,\" meaning black pool.",
+"The harp is Ireland's national symbol and appears on its euro coins."
+],
+"Italy": [
+"Rome is called the Eternal City, and legend says Romulus founded it in 753 BC.",
+"Italy completely surrounds two independent countries: San Marino and Vatican City."
+],
+"Latvia": [
+"Riga was founded in 1201 and is famous for its many Art Nouveau buildings.",
+"Latvia's Song and Dance Festival tradition is recognized by UNESCO as cultural heritage."
+],
+"Liechtenstein": [
+"Vaduz is overlooked by Vaduz Castle, the home of the Prince of Liechtenstein.",
+"Liechtenstein is one of only two doubly landlocked countries in the world, with Uzbekistan."
+],
+"Lithuania": [
+"Vilnius's Old Town, filled with Baroque churches, is a UNESCO World Heritage Site.",
+"The Lithuanian language is known for preserving many ancient features of early Indo-European."
+],
+"Luxembourg": [
+"Luxembourg City sits on cliffs and old fortifications once nicknamed the Gibraltar of the North.",
+"Luxembourg is the only grand duchy left in the world."
+],
+"Malta": [
+"Valletta was built after the Great Siege of 1565 and named after Grand Master Jean de Valette.",
+"Malta's megalithic temples are among the oldest free-standing structures on Earth, older than Egypt's pyramids."
+],
+"Moldova": [
+"Chișinău lies on the Bîc River and was first mentioned in written records in 1436.",
+"Moldova has a long winemaking tradition, with wine cellars that stretch for kilometers underground."
+],
+"Monaco": [
+"The Monaco Grand Prix has been raced through the streets of Monaco since 1929.",
+"Monaco is the second-smallest country in the world, after Vatican City."
+],
+"Montenegro": [
+"Podgorica was called Titograd from 1946 to 1992, in honor of Yugoslav leader Josip Broz Tito.",
+"Montenegro's name means \"Black Mountain,\" after the dark forests of Mount Lovćen."
+],
+"Netherlands": [
+"Amsterdam's ring of 17th-century canals is a UNESCO World Heritage Site.",
+"About a quarter of the Netherlands lies below sea level, protected by dikes and dunes."
+],
+"North Macedonia": [
+"Skopje is the birthplace of Mother Teresa, who was born there in 1910.",
+"Lake Ohrid, shared with Albania, is one of Europe's oldest lakes and a UNESCO World Heritage Site."
+],
+"Norway": [
+"Oslo was named Christiania for about three centuries before taking back the name Oslo in 1925.",
+"Norway's coast is famous for its fjords, long narrow sea inlets carved by glaciers."
+],
+"Poland": [
+"Warsaw's Old Town was carefully rebuilt after World War II and is a UNESCO World Heritage Site.",
+"Astronomer Nicolaus Copernicus, who placed the Sun at the center of the solar system, was born in Poland."
+],
+"Portugal": [
+"Lisbon was largely rebuilt after a great earthquake struck the city in 1755.",
+"Portuguese explorer Vasco da Gama was the first European to reach India by sea, in 1498."
+],
+"Romania": [
+"Bucharest was once nicknamed \"Little Paris\" for its elegant boulevards and buildings.",
+"The Danube reaches the Black Sea through the Danube Delta, most of which lies in Romania."
+],
+"Russia": [
+"Moscow's Red Square is home to Saint Basil's Cathedral, famous for its colorful onion domes.",
+"Russia's Lake Baikal is the deepest lake in the world."
+],
+"San Marino": [
+"The city of San Marino sits atop Mount Titano, crowned by three famous towers.",
+"San Marino is one of the world's oldest republics, traditionally said to be founded in 301 AD."
+],
+"Serbia": [
+"Belgrade sits where the Sava River meets the Danube, and its name means white city.",
+"The Iron Gates is a dramatic gorge where the Danube forms part of Serbia's border with Romania."
+],
+"Slovakia": [
+"Bratislava, then called Pressburg, was the coronation city of Hungarian kings from 1563 to 1830.",
+"Spiš Castle in Slovakia is one of the largest castle sites in Central Europe and a UNESCO World Heritage Site."
+],
+"Slovenia": [
+"Ljubljana's symbol is a dragon, which appears on its coat of arms and its famous Dragon Bridge.",
+"Slovenia's caves are home to the olm, a blind salamander nicknamed the human fish."
+],
+"Spain": [
+"Madrid became Spain's capital in 1561, when King Philip II moved the royal court there.",
+"Every year in the Spanish town of Buñol, people throw tomatoes at each other at La Tomatina festival."
+],
+"Sweden": [
+"Stockholm is built on 14 islands where Lake Mälaren meets the Baltic Sea.",
+"The Nobel Prizes were created by the will of Swedish inventor Alfred Nobel."
+],
+"Switzerland": [
+"Bern has a bear on its coat of arms, and live bears are kept at the city's Bear Park.",
+"Switzerland has four national languages: German, French, Italian, and Romansh."
+],
+"Ukraine": [
+"Kyiv is one of the oldest cities in Eastern Europe, and its Saint Sophia Cathedral dates from the 11th century.",
+"Ukraine is known for pysanky, colorful traditional decorated Easter eggs."
+],
+"United Kingdom": [
+"London was founded by the Romans, who called it Londinium.",
+"The United Kingdom is made up of England, Scotland, Wales, and Northern Ireland."
+],
+"Vatican City": [
+"Vatican City is home to St. Peter's Basilica and the Sistine Chapel, whose ceiling Michelangelo painted.",
+"Vatican City is the smallest independent country in the world by area."
+]
+};
 const DATA = [];
 for (const [region, block] of Object.entries(RAW)) {
   for (const line of block.split("\n")) {
@@ -1051,6 +1829,7 @@ function finish() {
   $("retryBtn").hidden = !missed.length;
   $("retryBtn").textContent = missed.length === 1 ? "Retry this one now" : `Retry ${missed.length} missed now`;
   $("retryBtn").onclick = () => startTrip(cfg, missed);
+  $("againBtn").classList.toggle("ghost", missed.length > 0);
   const key = cfgKey(cfg);
   const prevBest = store.get(key);
   const isRecord = !S.retry && (!prevBest || S.score / total > prevBest.score / prevBest.total);
