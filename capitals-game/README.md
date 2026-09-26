@@ -12,6 +12,7 @@ Open `index.html` in a browser. No build step or dependencies.
 - Notes on tricky cases (Bolivia, South Africa, Sri Lanka, etc.)
 - **Passport:** the first time you name a country's capital correctly, it gets a stamp. The passport view shows all 194 countries by region
 - **Friends board:** everyone's passport ranked by stamps (ties go to flights boarded), with accuracy, km flown and best streak
+- **Selfie postcards:** once you have a city's stamp, you can make a postcard from it. Take a selfie or choose a photo, drag and zoom it into the polaroid, pick day, sunset or night, and save it as a PNG. Each capital gets a skyline drawn from its name, with building styles that depend on the region. The photo never leaves the device
 - Best score per route is saved in the browser
 
 ## Competing with friends

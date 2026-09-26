@@ -176,7 +176,23 @@ legend{padding:0;margin-bottom:8px}
 .bar i{display:block;height:100%;background:var(--accent)}
 .empty{padding:18px 0;color:var(--muted)}
 
+/* Postcard */
+.pc-grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;align-items:start}
+.pc-canvas{display:block;width:100%;max-width:100%;height:auto;border-radius:10px;box-shadow:var(--shadow);background:var(--stub)}
+.pc-canvas.has-photo{touch-action:none;cursor:grab}
+.pc-controls{display:grid;gap:18px;min-width:0}
+.pc-controls .field{display:grid;gap:8px}
+.sr{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.sr:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+label.btn{display:inline-flex;align-items:center}
+select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--ticket);color:var(--ink);font-size:16px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.hint{margin:0;font-size:13px;color:var(--muted)}
+button.st{font:inherit;font-size:12px;cursor:pointer}
+button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
+
 @media (max-width:700px){
+  .pc-grid{grid-template-columns:minmax(0,1fr)}
   .book{padding:18px 18px 20px}
   .ticket{grid-template-columns:minmax(0,1fr)}
   .stub{border-left:0;border-top:2px dashed var(--line);border-radius:0 0 16px 16px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center}
@@ -285,7 +301,7 @@ legend{padding:0;margin-bottom:8px}
       </form>
       <div class="feedback">
         <p id="feedback" aria-live="polite"></p>
-        <button class="btn" id="nextBtn" hidden>Next flight</button>
+        <div class="actions"><button class="btn ghost" id="pcOpen" type="button" hidden>Postcard</button><button class="btn" id="nextBtn" hidden>Next flight</button></div>
       </div>
     </div>
     <aside class="stub">
@@ -312,6 +328,7 @@ legend{padding:0;margin-bottom:8px}
       </div>
       <div class="actions">
         <button class="btn" id="againBtn">Fly this route again</button>
+        <button class="btn ghost" id="doneCard" hidden>Make a postcard</button>
         <button class="btn ghost" id="changeBtn">Change route</button>
       </div>
     </div>
@@ -322,12 +339,45 @@ legend{padding:0;margin-bottom:8px}
     </aside>
   </section>
 
+  <!-- Postcard -->
+  <section id="postcard" class="book" aria-label="Postcard" hidden>
+    <div class="book-head">
+      <div><span class="label">Postcard · unlocked by your stamps</span><h2 id="pcTitle">Postcard</h2></div>
+      <button class="btn ghost" id="pcBack" type="button">Back</button>
+    </div>
+    <div class="pc-grid">
+      <canvas id="pcCanvas" class="pc-canvas" width="1500" height="1000" aria-label="Postcard preview"></canvas>
+      <div class="pc-controls">
+        <div class="field">
+          <span class="label">Your photo</span>
+          <div class="actions">
+            <input type="file" id="pcSelfie" accept="image/*" capture="user" class="sr"><label class="btn" for="pcSelfie">Take a selfie</label>
+            <input type="file" id="pcFile" accept="image/*" class="sr"><label class="btn ghost" for="pcFile">Choose photo</label>
+          </div>
+        </div>
+        <div class="field"><label class="label" for="pcZoom">Zoom</label><input type="range" id="pcZoom" min="1" max="3" step="0.01" value="1"></div>
+        <div class="field"><label class="label" for="pcCity">City</label><select id="pcCity"></select></div>
+        <fieldset>
+          <legend class="label">Light</legend>
+          <div class="seg">
+            <input type="radio" name="pcTime" id="pcDay" value="day" checked><label for="pcDay">Day</label>
+            <input type="radio" name="pcTime" id="pcSunset" value="sunset"><label for="pcSunset">Sunset</label>
+            <input type="radio" name="pcTime" id="pcNight" value="night"><label for="pcNight">Night</label>
+          </div>
+        </fieldset>
+        <div class="actions"><button class="btn" id="pcSave" type="button">Save postcard</button><button class="btn ghost" id="pcClear" type="button">Remove photo</button></div>
+        <p class="hint" id="pcMsg" aria-live="polite">Your photo stays on this device. Nothing is uploaded.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Passport -->
   <section id="passportView" class="book" aria-label="My passport" hidden>
     <div class="book-head">
       <div><span class="label">Passport · Capital Air frequent flyer</span><h2 id="holder">Traveller</h2></div>
       <div class="tally"><b id="pCount">0/194</b><span>stamps · <span id="pMeta">0 flights</span></span></div>
     </div>
+    <p class="board-note">Tap a stamp to make a postcard from that city.</p>
     <div id="pRegions" class="region-list"></div>
     <pre class="mrz" id="mrz" aria-label="Machine readable zone"></pre>
   </section>
@@ -685,8 +735,8 @@ function renderPassport() {
     block.innerHTML = `<h3>${region}<span>${got}/${list.length}</span></h3><div class="stamps"></div>`;
     const grid = block.lastChild;
     for (const d of list) {
-      const el = document.createElement("div");
       const t = P.stamps[d.country];
+      const el = document.createElement(t ? "button" : "div");
       el.className = "st" + (t ? " on" : "");
       if (t) {
         el.style.setProperty("--rot", `${((idx * 37) % 15) - 7}deg`);
@@ -694,7 +744,9 @@ function renderPassport() {
         el.children[0].textContent = code(d.capital);
         el.children[1].textContent = d.country;
         el.children[2].textContent = dayMonth(t);
-        el.title = `${d.capital}, ${d.country}`;
+        el.type = "button";
+        el.title = `Make a postcard from ${d.capital}`;
+        el.onclick = () => openPostcard(d.country);
       } else {
         el.textContent = d.country;
       }
@@ -752,7 +804,7 @@ async function renderBoard() {
 /* ---------- Tabs ---------- */
 let tab = "fly", flyScreen = "setup";
 function paint() {
-  for (const s of ["setup", "play", "done"]) $(s).hidden = !(tab === "fly" && s === flyScreen);
+  for (const s of ["setup", "play", "done", "postcard"]) $(s).hidden = !(tab === "fly" && s === flyScreen);
   $("passportView").hidden = tab !== "passport";
   $("boardView").hidden = tab !== "board";
   for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
@@ -817,6 +869,7 @@ function ask() {
   $("stampSlot").innerHTML = "";
   $("feedback").innerHTML = "";
   $("nextBtn").hidden = true;
+  $("pcOpen").hidden = true;
 
   const label = d => c2k ? d.capital : d.country;
   if (cfg.style === "choice") {
@@ -896,6 +949,9 @@ function answer(correct, btn) {
     main.textContent = (c2k ? `Correct. ${q.capital} is the capital of ${q.country}.` : `Correct. ${q.capital} is in ${q.country}.`) +
       (isNew ? ` Stamped: ${stampCount(P.stamps)}/${TOTAL} in your passport.` : "");
     S.prev = q;
+    $("pcOpen").textContent = `Postcard from ${q.capital}`;
+    $("pcOpen").onclick = () => openPostcard(q.country);
+    $("pcOpen").hidden = false;
   } else {
     S.streak = 0;
     S.misses.push(q);
@@ -954,6 +1010,9 @@ function finish() {
   $("dBest").textContent = `${best.score}/${best.total} boarded`;
   const pct = S.score / total;
   $("doneStamp").innerHTML = `<div class="stamp ${pct >= .7 ? "good" : "bad"}">${pct === 1 ? "Perfect trip" : pct >= .7 ? "Welcome home" : "Rebook"}<small>${stampCount(P.stamps)}/${TOTAL} stamps</small></div>`;
+  const last = S.prev && S.prev.country;
+  $("doneCard").hidden = !last;
+  if (last) { $("doneCard").textContent = `Postcard from ${S.prev.capital}`; $("doneCard").onclick = () => openPostcard(last); }
   show("done");
   $("againBtn").focus();
 }
@@ -976,11 +1035,355 @@ document.addEventListener("keydown", e => {
   if (!S.answered && cfg.style === "choice" && /^[1-4]$/.test(e.key)) {
     const b = $("opts").children[+e.key - 1];
     if (b) b.click();
-  } else if (S.answered && e.key === "Enter" && document.activeElement !== $("nextBtn")) {
+  } else if (S.answered && e.key === "Enter" && !(document.activeElement && document.activeElement.tagName === "BUTTON")) {
     e.preventDefault();
     next();
   }
 });
+
+/* ---------- Postcard: selfie over a drawn skyline of a stamped capital ---------- */
+const PCW = 1500, PCH = 1000;
+const POLA = { cx: 1110, cy: 540, w: 440, h: 530, rot: 0.06, pad: 24, cap: 110 };
+const INK = { Africa: "#B0561A", Americas: "#1B7447", Asia: "#B3302A", Europe: "#2346C8", Oceania: "#7A3FA8" };
+const SKIES = {
+  day:    { sky: ["#3F7FC6", "#8CC1EA", "#DCEFFA"], hill: "#A9BFD3", back: "#8EA7C0", front: "#3C546E", win: "rgba(255,255,255,.22)", p: .5, sun: "#FFF4D0", water: ["#5E93C4", "#2F5C8C"] },
+  sunset: { sky: ["#2B275A", "#B5507A", "#F29A5B", "#FCD9A0"], hill: "#9C6C8C", back: "#7B5A86", front: "#2A2140", win: "#FFC870", p: .18, sun: "#FFD08A", water: ["#8A5A7C", "#2A2140"] },
+  night:  { sky: ["#050A1C", "#13234A", "#2A4274"], hill: "#1A2A4C", back: "#22345A", front: "#0A1122", win: "#FFD27A", p: .38, sun: "#F4F1E6", water: ["#16284C", "#050A1C"] }
+};
+const PC = { country: null, img: null, zoom: 1, ox: 0, oy: 0, time: "day", back: { tab: "fly", screen: "setup" } };
+
+function hashStr(s) {
+  let h = 1779033703 ^ s.length;
+  for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; }
+  return h >>> 0;
+}
+function rng32(a) {
+  return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function archOf(d) {
+  if (d.region === "Europe") return "europe";
+  if (d.region === "Asia") return d.lon < 80 ? "dome" : "pagoda";
+  if (d.region === "Africa") return d.lat > 10 ? "dome" : "modern";
+  return "modern";
+}
+
+function domePath(ctx, cx, cy, rx, ry) { ctx.moveTo(cx - rx, cy); ctx.ellipse(cx, cy, rx, ry, 0, Math.PI, 0); ctx.closePath(); }
+function spirePath(ctx, cx, y, half, h) { ctx.moveTo(cx - half, y); ctx.lineTo(cx, y - h); ctx.lineTo(cx + half, y); ctx.closePath(); }
+function pagodaRoof(ctx, cx, y, outer, inner) {
+  ctx.moveTo(cx - outer / 2 - 10, y - 10);
+  ctx.quadraticCurveTo(cx, y + 6, cx + outer / 2 + 10, y - 10);
+  ctx.lineTo(cx + inner / 2, y - 24); ctx.lineTo(cx - inner / 2, y - 24); ctx.closePath();
+}
+
+function building(ctx, r, x, w, h, base, arch, color, win) {
+  const top = base - h, cx = x + w / 2, k = r();
+  ctx.fillStyle = color;
+  ctx.fillRect(x, top, w, h);
+  ctx.beginPath();
+  if (arch === "europe") {
+    if (k < .35) spirePath(ctx, cx, top, w / 2 + 2, w * .45);
+    else if (k < .5) { const sw = Math.min(w * .4, 22); ctx.rect(cx - sw / 2, top - 40, sw, 40); spirePath(ctx, cx, top - 40, sw / 2 + 2, sw * 3.2); }
+    else if (k < .6) domePath(ctx, cx, top, w * .38, w * .38);
+  } else if (arch === "dome") {
+    if (k < .35) { domePath(ctx, cx, top, w * .42, w * .5); ctx.rect(cx - 1.5, top - w * .5 - 14, 3, 14); }
+    else if (k < .55) { const mx = x + w * (r() < .5 ? .15 : .85); ctx.rect(mx - 5, top - 110, 10, 110); spirePath(ctx, mx, top - 110, 7, 22); }
+  } else if (arch === "pagoda") {
+    if (k < .4) { let y = top, outer = w, inner = w * .62; for (let i = 0; i < 3; i++) { pagodaRoof(ctx, cx, y, outer, inner); ctx.rect(cx - inner / 2 + 4, y - 44, inner - 8, 22); y -= 44; outer = inner; inner *= .75; } }
+  } else {
+    if (k < .25) ctx.rect(cx - 1.5, top - 60, 3, 60);
+    else if (k < .4) { ctx.moveTo(x, top); ctx.lineTo(x + w, top - w * .5); ctx.lineTo(x + w, top); ctx.closePath(); }
+  }
+  ctx.fill();
+  if (win) {
+    ctx.fillStyle = win.c;
+    for (let wy = top + 12; wy < base - 14; wy += 20)
+      for (let wx = x + 8; wx < x + w - 10; wx += 14)
+        if (r() < win.p) ctx.fillRect(wx, wy, 6, 9);
+  }
+}
+
+function skyline(ctx, r, base, minH, maxH, arch, color, win) {
+  let x = -20;
+  while (x < PCW + 20) {
+    const w = 36 + r() * 74;
+    building(ctx, r, x, w, minH + r() * (maxH - minH), base, arch, color, win);
+    x += w + r() * 10 - 3;
+  }
+}
+
+function landmark(ctx, cx, base, arch, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  if (arch === "europe") {
+    ctx.rect(cx - 90, base - 170, 180, 170);
+    spirePath(ctx, cx, base - 170, 95, 60);
+    for (const s of [-70, 70]) { ctx.rect(cx + s - 22, base - 290, 44, 290); spirePath(ctx, cx + s, base - 290, 26, 100); }
+  } else if (arch === "dome") {
+    ctx.rect(cx - 120, base - 150, 240, 150);
+    domePath(ctx, cx, base - 150, 95, 120);
+    ctx.rect(cx - 2.5, base - 300, 5, 32);
+    for (const s of [-150, 150]) { ctx.rect(cx + s - 9, base - 330, 18, 330); spirePath(ctx, cx + s, base - 330, 12, 40); }
+  } else if (arch === "pagoda") {
+    ctx.rect(cx - 70, base - 30, 140, 30);
+    let y = base - 30, outer = 190, inner = 130;
+    for (let i = 0; i < 5; i++) { pagodaRoof(ctx, cx, y, outer, inner); ctx.rect(cx - inner / 2 + 6, y - 54, inner - 12, 32); y -= 54; outer = inner + 20; inner *= .82; }
+    ctx.rect(cx - 2.5, y - 60, 5, 60);
+  } else {
+    ctx.moveTo(cx - 60, base); ctx.lineTo(cx - 14, base - 200); ctx.lineTo(cx + 14, base - 200); ctx.lineTo(cx + 60, base); ctx.closePath();
+    ctx.rect(cx - 14, base - 380, 28, 380);
+    ctx.moveTo(cx + 46, base - 380); ctx.ellipse(cx, base - 380, 46, 18, 0, 0, Math.PI * 2);
+    ctx.rect(cx - 2, base - 470, 4, 90);
+  }
+  ctx.fill();
+}
+
+function palm(ctx, x, base, h, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = 8; ctx.lineCap = "round";
+  ctx.beginPath(); ctx.moveTo(x, base); ctx.quadraticCurveTo(x + 22, base - h / 2, x + 12, base - h); ctx.stroke();
+  ctx.fillStyle = color;
+  for (let i = 0; i < 7; i++) {
+    ctx.save(); ctx.translate(x + 12, base - h); ctx.rotate(-Math.PI + i * Math.PI / 6 + .1);
+    ctx.beginPath(); ctx.ellipse(36, 8, 40, 7, .3, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+}
+
+function fitLines(ctx, text, maxW, maxSize) {
+  ctx.font = `800 ${maxSize}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  let lines = [text];
+  const words = text.split(" ");
+  if (ctx.measureText(text).width > maxW && words.length > 1) {
+    let best = null;
+    for (let i = 1; i < words.length; i++) {
+      const a = words.slice(0, i).join(" "), b = words.slice(i).join(" ");
+      const w = Math.max(ctx.measureText(a).width, ctx.measureText(b).width);
+      if (!best || w < best.w) best = { w, lines: [a, b] };
+    }
+    lines = best.lines;
+  }
+  const widest = Math.max(...lines.map(l => ctx.measureText(l).width));
+  return { lines, size: Math.min(maxSize, maxSize * maxW / widest) };
+}
+
+let fontsReady = null;
+function loadFonts() {
+  if (!fontsReady) fontsReady = Promise.all([
+    '800 100px "Barlow Condensed"', '700 40px "Barlow Condensed"', '600 38px "Barlow Condensed"', '700 60px "JetBrains Mono"'
+  ].map(f => document.fonts.load(f))).catch(() => {});
+  return fontsReady;
+}
+
+async function drawPostcard() {
+  await loadFonts();
+  const d = BY_COUNTRY[PC.country];
+  if (!d) return;
+  const ctx = $("pcCanvas").getContext("2d");
+  const pal = SKIES[PC.time], arch = archOf(d), r = rng32(hashStr(d.capital));
+  const base = 760, cap = d.capital.toUpperCase();
+  ctx.save();
+  ctx.clearRect(0, 0, PCW, PCH);
+
+  // Sky, stars, sun or moon
+  let g = ctx.createLinearGradient(0, 0, 0, base);
+  pal.sky.forEach((c, i) => g.addColorStop(i / (pal.sky.length - 1), c));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, PCW, PCH);
+  if (PC.time === "night") {
+    const sr = rng32(hashStr(d.country));
+    ctx.fillStyle = "#FFFFFF";
+    for (let i = 0; i < 160; i++) { ctx.globalAlpha = .25 + sr() * .7; ctx.fillRect(sr() * PCW, sr() * base * .75, 2, 2); }
+    ctx.globalAlpha = 1;
+  }
+  const sunX = 660 + r() * 200, sunY = PC.time === "sunset" ? 560 : 390 + r() * 60;
+  ctx.save(); ctx.shadowColor = pal.sun; ctx.shadowBlur = 70; ctx.fillStyle = pal.sun;
+  ctx.beginPath(); ctx.arc(sunX, sunY, PC.time === "night" ? 46 : 64, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+
+  // Hills, skyline layers, landmark
+  const phase = r() * 6;
+  ctx.fillStyle = pal.hill; ctx.beginPath(); ctx.moveTo(0, base);
+  for (let x = 0; x <= PCW; x += 20) ctx.lineTo(x, base - 170 - Math.sin(x / 260 + phase) * 60 - Math.sin(x / 97 + phase) * 18);
+  ctx.lineTo(PCW, base); ctx.fill();
+  skyline(ctx, r, base, 90, 260, arch, pal.back, null);
+  landmark(ctx, 430 + r() * 180, base, arch, pal.front);
+  skyline(ctx, r, base, 40, 150, arch, pal.front, { p: pal.p, c: pal.win });
+
+  // Water or ground
+  if (r() < .55) {
+    g = ctx.createLinearGradient(0, base, 0, PCH);
+    g.addColorStop(0, pal.water[0]); g.addColorStop(1, pal.water[1]);
+    ctx.fillStyle = g; ctx.fillRect(0, base, PCW, PCH - base);
+    ctx.fillStyle = "rgba(255,255,255,.14)";
+    for (let i = 0; i < 70; i++) ctx.fillRect(r() * PCW, base + 8 + r() * (PCH - base - 16), 20 + r() * 60, 2);
+  } else {
+    ctx.fillStyle = pal.front; ctx.fillRect(0, base, PCW, PCH - base);
+  }
+  if (arch === "modern" && Math.abs(d.lat) < 24) { palm(ctx, 720, base + 30, 230, pal.front); palm(ctx, 790, base + 40, 180, pal.front); }
+
+  // Lettering
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = 18; ctx.shadowOffsetY = 4;
+  ctx.fillStyle = "#FFFFFF"; ctx.textBaseline = "alphabetic";
+  ctx.font = '700 40px "Barlow Condensed", "Arial Narrow", sans-serif';
+  if ("letterSpacing" in ctx) ctx.letterSpacing = "8px";
+  ctx.fillText("GREETINGS FROM", 90, 130);
+  if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  const fit = fitLines(ctx, cap, 760, 200);
+  ctx.font = `800 ${fit.size}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  let y = 130 + fit.size * .95;
+  for (const line of fit.lines) {
+    ctx.fillStyle = INK[d.region]; ctx.fillText(line, 97, y + 7);
+    ctx.fillStyle = "#FFFFFF"; ctx.fillText(line, 90, y);
+    y += fit.size * .9;
+  }
+  ctx.font = '700 36px "Barlow Condensed", "Arial Narrow", sans-serif';
+  if ("letterSpacing" in ctx) ctx.letterSpacing = "4px";
+  ctx.fillText(`${d.country.toUpperCase()} · ${d.region.toUpperCase()}`, 92, y - fit.size * .9 + 60);
+  if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  ctx.restore();
+
+  // Polaroid with the player's photo
+  const { w, h, pad } = POLA, pw = w - 2 * pad, ph = h - pad - POLA.cap, px = -w / 2 + pad, py = -h / 2 + pad;
+  ctx.save();
+  ctx.translate(POLA.cx, POLA.cy); ctx.rotate(POLA.rot);
+  ctx.save(); ctx.shadowColor = "rgba(0,0,0,.4)"; ctx.shadowBlur = 34; ctx.shadowOffsetY = 14;
+  ctx.fillStyle = "#FBFAF6"; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(px, py, pw, ph); ctx.clip();
+  if (PC.img) {
+    const iw = PC.img.width, ih = PC.img.height, s = Math.max(pw / iw, ph / ih) * PC.zoom, dw = iw * s, dh = ih * s;
+    const mx = Math.max(0, (dw - pw) / 2), my = Math.max(0, (dh - ph) / 2);
+    PC.ox = Math.max(-mx, Math.min(mx, PC.ox)); PC.oy = Math.max(-my, Math.min(my, PC.oy));
+    ctx.drawImage(PC.img, px + pw / 2 - dw / 2 + PC.ox, py + ph / 2 - dh / 2 + PC.oy, dw, dh);
+  } else {
+    ctx.fillStyle = "#D9DEE5"; ctx.fillRect(px, py, pw, ph);
+    ctx.fillStyle = "#B7C0CC";
+    ctx.beginPath(); ctx.arc(0, py + ph * .42, 70, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0, py + ph + 40, 150, 150, 0, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = "#58687D"; ctx.textAlign = "center";
+    ctx.font = '600 30px "Barlow Condensed", "Arial Narrow", sans-serif';
+    ctx.fillText("Add your photo", 0, py + 50);
+  }
+  ctx.restore();
+  const who = (net.name || "").split(" ")[0] || "Me";
+  ctx.fillStyle = "#1B2430"; ctx.textAlign = "center";
+  let cs = 40; ctx.font = `600 ${cs}px "Barlow Condensed", "Arial Narrow", sans-serif`;
+  const caption = `${who} in ${d.capital}`;
+  const cw = ctx.measureText(caption).width;
+  if (cw > pw) { cs = cs * pw / cw; ctx.font = `600 ${cs}px "Barlow Condensed", "Arial Narrow", sans-serif`; }
+  ctx.fillText(caption, 0, h / 2 - POLA.cap / 2 + 14);
+  ctx.restore();
+
+  // Postage stamp
+  ctx.save();
+  ctx.translate(1350, 150); ctx.rotate(-0.05);
+  ctx.fillStyle = "#FBFAF6";
+  ctx.fillRect(-80, -95, 160, 190);
+  for (let i = -80; i <= 80; i += 16) { ctx.beginPath(); ctx.arc(i, -95, 6, 0, Math.PI * 2); ctx.arc(i, 95, 6, 0, Math.PI * 2); ctx.fill(); }
+  for (let j = -95; j <= 95; j += 16) { ctx.beginPath(); ctx.arc(-80, j, 6, 0, Math.PI * 2); ctx.arc(80, j, 6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.fillStyle = INK[d.region]; ctx.fillRect(-66, -81, 132, 162);
+  ctx.fillStyle = "#FFFFFF"; ctx.textAlign = "center";
+  ctx.font = '700 18px "Barlow Condensed", "Arial Narrow", sans-serif'; ctx.fillText("CAPITAL AIR", 0, -50, 120);
+  ctx.font = '700 54px "JetBrains Mono", ui-monospace, monospace'; ctx.fillText(code(d.capital), 0, 16);
+  ctx.font = '600 20px "JetBrains Mono", ui-monospace, monospace'; ctx.fillText(`${stampCount(P.stamps)}/${TOTAL}`, 0, 60);
+  ctx.restore();
+
+  // Postmark
+  const ink = "rgba(255,255,255,.82)", when = P.stamps[d.country] || Date.now();
+  ctx.save();
+  ctx.translate(230, 860); ctx.rotate(-0.12);
+  ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 4; ctx.textAlign = "center";
+  ctx.beginPath(); ctx.arc(0, 0, 88, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 76, 0, Math.PI * 2); ctx.stroke();
+  ctx.font = '700 20px "Barlow Condensed", "Arial Narrow", sans-serif'; ctx.fillText("CAPITAL AIR", 0, -34);
+  ctx.font = '700 40px "JetBrains Mono", ui-monospace, monospace'; ctx.fillText(code(d.capital), 0, 12);
+  ctx.font = '600 18px "JetBrains Mono", ui-monospace, monospace'; ctx.fillText(new Date(when).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase(), 0, 44);
+  ctx.lineWidth = 4;
+  for (let k = 0; k < 4; k++) {
+    ctx.beginPath();
+    for (let x = 100; x <= 420; x += 8) ctx.lineTo(x, -42 + k * 26 + Math.sin(x / 22) * 7);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Card edge
+  ctx.strokeStyle = "#FBFAF6"; ctx.lineWidth = 28; ctx.strokeRect(14, 14, PCW - 28, PCH - 28);
+  ctx.restore();
+}
+
+let pcFrame = 0;
+function redrawSoon() { if (!pcFrame) pcFrame = requestAnimationFrame(() => { pcFrame = 0; drawPostcard(); }); }
+
+function openPostcard(country) {
+  PC.back = { tab, screen: flyScreen };
+  PC.country = country;
+  const sel = $("pcCity");
+  sel.innerHTML = "";
+  DATA.filter(d => P.stamps[d.country] || d.country === country)
+    .sort((a, b) => a.capital.localeCompare(b.capital))
+    .forEach(d => { const o = document.createElement("option"); o.value = d.country; o.textContent = `${d.capital}, ${d.country}`; sel.appendChild(o); });
+  sel.value = country;
+  $("pcTitle").textContent = `Greetings from ${BY_COUNTRY[country].capital}`;
+  $("pcMsg").textContent = "Your photo stays on this device. Nothing is uploaded.";
+  tab = "fly"; flyScreen = "postcard"; paint();
+  window.scrollTo({ top: 0 });
+  drawPostcard();
+}
+
+async function loadPhoto(file) {
+  if (!file) return;
+  let img = null;
+  try { img = await createImageBitmap(file, { imageOrientation: "from-image" }); }
+  catch {
+    img = await new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = URL.createObjectURL(file); });
+  }
+  if (!img) { $("pcMsg").textContent = "This browser can't open that file. Try a JPG or PNG."; return; }
+  PC.img = img; PC.zoom = 1; PC.ox = 0; PC.oy = 0;
+  $("pcZoom").value = "1";
+  $("pcCanvas").classList.add("has-photo");
+  $("pcMsg").textContent = "Drag the photo to move it. Your photo stays on this device.";
+  drawPostcard();
+}
+
+async function savePostcard() {
+  const d = BY_COUNTRY[PC.country];
+  const blob = await new Promise(res => $("pcCanvas").toBlob(res, "image/png"));
+  if (!blob) { $("pcMsg").textContent = "The postcard couldn't be created. Try removing the photo and adding it again."; return; }
+  const filename = `postcard-${norm(d.capital)}.png`;
+  const dl = window.claude && typeof window.claude.use === "function" ? await claude.use("downloads") : null;
+  if (dl) {
+    try { await dl.save({ filename, data: blob }); $("pcMsg").textContent = "Postcard saved."; }
+    catch (e) { $("pcMsg").textContent = e && e.code === "declined" ? "Save cancelled." : "Saving isn't available here. Try the page in a desktop browser."; }
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  $("pcMsg").textContent = "Postcard saved.";
+}
+
+(() => {
+  const cv = $("pcCanvas");
+  let drag = null;
+  const at = e => { const b = cv.getBoundingClientRect(); return { x: (e.clientX - b.left) * PCW / b.width, y: (e.clientY - b.top) * PCH / b.height }; };
+  cv.addEventListener("pointerdown", e => {
+    if (!PC.img) return;
+    const p = at(e);
+    if (Math.abs(p.x - POLA.cx) < POLA.w / 2 && Math.abs(p.y - POLA.cy) < POLA.h / 2) {
+      drag = { x: p.x, y: p.y, ox: PC.ox, oy: PC.oy };
+      cv.setPointerCapture(e.pointerId);
+    }
+  });
+  cv.addEventListener("pointermove", e => { if (!drag) return; const p = at(e); PC.ox = drag.ox + p.x - drag.x; PC.oy = drag.oy + p.y - drag.y; redrawSoon(); });
+  const end = () => { drag = null; };
+  cv.addEventListener("pointerup", end);
+  cv.addEventListener("pointercancel", end);
+  $("pcSelfie").addEventListener("change", e => { loadPhoto(e.target.files[0]); e.target.value = ""; });
+  $("pcFile").addEventListener("change", e => { loadPhoto(e.target.files[0]); e.target.value = ""; });
+  $("pcZoom").addEventListener("input", e => { PC.zoom = +e.target.value; redrawSoon(); });
+  $("pcCity").addEventListener("change", e => { PC.country = e.target.value; $("pcTitle").textContent = `Greetings from ${BY_COUNTRY[PC.country].capital}`; drawPostcard(); });
+  for (const el of document.querySelectorAll('input[name="pcTime"]')) el.addEventListener("change", e => { PC.time = e.target.value; drawPostcard(); });
+  $("pcClear").onclick = () => { PC.img = null; cv.classList.remove("has-photo"); $("pcMsg").textContent = "Photo removed."; drawPostcard(); };
+  $("pcSave").onclick = savePostcard;
+  $("pcBack").onclick = () => { tab = PC.back.tab; flyScreen = PC.back.screen; paint(); };
+})();
 
 if (["passport", "board"].includes(location.hash.slice(1))) tab = location.hash.slice(1);
 paint();
