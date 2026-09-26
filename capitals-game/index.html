@@ -176,6 +176,14 @@ legend{padding:0;margin-bottom:8px}
 .bar i{display:block;height:100%;background:var(--accent)}
 .empty{padding:18px 0;color:var(--muted)}
 
+/* Facts and review */
+.fact{display:grid;gap:4px;margin-top:10px;padding:10px 12px;background:var(--stub);border-radius:8px;font-size:15px;line-height:1.45}
+.review-pill{margin-left:8px;vertical-align:1px}
+.misses li.layover{display:grid;gap:4px;padding:12px 0}
+.miss-head{display:flex;justify-content:space-between;gap:12px;font-size:16px}
+.miss-head b{font-weight:600;text-align:right}
+.misses p{margin:0;color:var(--muted);font-size:14px;max-width:65ch}
+
 /* Postcard */
 .pc-grid{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:22px;align-items:start}
 .pc-canvas{display:block;width:100%;max-width:100%;height:auto;border-radius:10px;box-shadow:var(--shadow);background:var(--stub)}
@@ -289,7 +297,7 @@ button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
         <div><span class="label">Region</span><b id="fRegion">–</b></div>
       </div>
       <div class="prompt">
-        <span class="label" id="askLabel">Country</span>
+        <span class="label" id="askLabel">Country</span><span class="pill review-pill" id="reviewPill" hidden>Review</span>
         <div class="ask" id="ask">–</div>
         <p id="askHint">Which city is its capital?</p>
       </div>
@@ -327,6 +335,7 @@ button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
         <ul class="misses" id="misses"></ul>
       </div>
       <div class="actions">
+        <button class="btn" id="retryBtn" hidden>Retry missed now</button>
         <button class="btn" id="againBtn">Fly this route again</button>
         <button class="btn ghost" id="doneCard" hidden>Make a postcard</button>
         <button class="btn ghost" id="changeBtn">Change route</button>
@@ -598,6 +607,7 @@ Tuvalu|Funafuti|-8.52|179.20||
 Vanuatu|Port Vila|-17.73|168.32||`
 };
 
+const FACTS = {}; /*FACTS*/
 const DATA = [];
 for (const [region, block] of Object.entries(RAW)) {
   for (const line of block.split("\n")) {
@@ -639,9 +649,10 @@ $("segRegion").innerHTML = REGIONS.map((r, i) =>
 ).join("");
 
 /* ---------- Passport: saved locally, synced to the shared board when available ---------- */
-const blankPassport = () => ({ stamps: {}, flights: 0, boarded: 0, km: 0, bestStreak: 0, trips: 0 });
+const blankPassport = () => ({ stamps: {}, review: {}, flights: 0, boarded: 0, km: 0, bestStreak: 0, trips: 0 });
 const localP = store.get("capdep-passport");
 let P = Object.assign(blankPassport(), localP && typeof localP === "object" ? localP : {});
+if (!P.review || typeof P.review !== "object") P.review = {};
 const net = { db: null, user: null, id: null, ref: null, name: "", writable: true, saving: false, dirty: false, board: [] };
 
 // Shared data is written by other viewers: only count stamps for real countries.
@@ -650,7 +661,7 @@ const stampCount = stamps => Object.keys(stamps || {}).filter(k => BY_COUNTRY[k]
 function passportBody() {
   return {
     stamps: P.stamps, stampCount: stampCount(P.stamps), flights: P.flights, boarded: P.boarded,
-    km: Math.round(P.km), bestStreak: P.bestStreak, trips: P.trips, updatedAt: Date.now()
+    km: Math.round(P.km), bestStreak: P.bestStreak, trips: P.trips, review: P.review, updatedAt: Date.now()
   };
 }
 
@@ -658,6 +669,7 @@ function mergeRemote(d) {
   const m = blankPassport();
   const remote = d.stamps && typeof d.stamps === "object" ? d.stamps : {};
   m.stamps = { ...remote };
+  m.review = { ...(d.review && typeof d.review === "object" ? d.review : {}), ...P.review };
   for (const [k, t] of Object.entries(P.stamps)) m.stamps[k] = remote[k] ? Math.min(remote[k], t) : t;
   for (const f of ["flights", "boarded", "km", "bestStreak", "trips"]) m[f] = Math.max(+d[f] || 0, +P[f] || 0);
   return m;
@@ -723,7 +735,7 @@ function renderPassport() {
   const n = stampCount(P.stamps);
   $("holder").textContent = net.name || "Traveller";
   $("pCount").textContent = `${n}/${TOTAL}`;
-  $("pMeta").textContent = `${fmt(P.flights)} flights · ${fmt(P.km)} km`;
+  $("pMeta").textContent = `${fmt(P.flights)} flights · ${fmt(P.km)} km` + (reviewCount(DATA) ? ` · ${reviewCount(DATA)} to review` : "");
   const wrap = $("pRegions");
   wrap.innerHTML = "";
   let idx = 0;
@@ -822,20 +834,35 @@ function readCfg() {
 const cfgKey = c => `capdep-best-${c.region}-${c.dir}-${c.style}-${c.len}`;
 const pool = c => DATA.filter(d => c.region === "All" || d.region === c.region);
 
+// Missed capitals come back in later trips until answered correctly twice.
+const reviewCount = list => list.filter(d => P.review[d.country]).length;
+const isDue = d => { const r = P.review[d.country]; return r && (+r.due || 0) <= P.trips + 1; };
+function factFor(d, which) {
+  const f = FACTS[d.country];
+  return f ? f[which] || f[0] : "";
+}
+
 function refreshSetup() {
   const c = readCfg();
   const list = pool(c);
   $("poolCount").textContent = c.len ? Math.min(c.len, list.length) : list.length;
   const best = store.get(cfgKey(c));
   const missing = list.filter(d => !P.stamps[d.country]).length;
-  $("bestLine").textContent = (best ? `${best.score}/${best.total} boarded` : "No trips yet") + ` · ${missing} unstamped here`;
+  $("bestLine").textContent = (best ? `${best.score}/${best.total} boarded` : "No trips yet") + ` · ${missing} unstamped here` + (reviewCount(list) ? ` · ${reviewCount(list)} to review` : "");
 }
 $("setupForm").addEventListener("change", refreshSetup);
 
-function startTrip(c) {
+function startTrip(c, only) {
   cfg = c;
-  const deck = shuffle(pool(c).slice());
-  S = { deck: c.len ? deck.slice(0, c.len) : deck, i: 0, score: 0, streak: 0, best: 0, km: 0, prev: null, misses: [], fresh: 0, answered: false };
+  let deck;
+  if (only) deck = shuffle(only.slice());
+  else {
+    const all = shuffle(pool(c).slice());
+    const size = c.len ? Math.min(c.len, all.length) : all.length;
+    const due = all.filter(isDue).slice(0, c.len ? Math.ceil(size * .4) : all.length);
+    deck = shuffle(due.concat(all.filter(d => !due.includes(d)).slice(0, size - due.length)));
+  }
+  S = { deck, retry: !!only, i: 0, score: 0, streak: 0, best: 0, km: 0, prev: null, misses: [], fresh: 0, answered: false };
   show("play");
   ask();
 }
@@ -861,6 +888,7 @@ function ask() {
   $("fSeat").textContent = (1 + rand(38)) + "ABCDEF"[rand(6)];
   $("fRegion").textContent = q.region;
   $("askLabel").textContent = c2k ? "Country" : "Capital";
+  $("reviewPill").hidden = !P.review[q.country];
   $("ask").textContent = c2k ? q.country : q.capital;
   $("askHint").textContent = (c2k ? "Which city is its capital?" : "Which country is this the capital of?") +
     (P.stamps[q.country] ? " Already stamped." : " Not in your passport yet.");
@@ -949,6 +977,12 @@ function answer(correct, btn) {
     main.textContent = (c2k ? `Correct. ${q.capital} is the capital of ${q.country}.` : `Correct. ${q.capital} is in ${q.country}.`) +
       (isNew ? ` Stamped: ${stampCount(P.stamps)}/${TOTAL} in your passport.` : "");
     S.prev = q;
+    const rv = P.review[q.country];
+    if (rv) {
+      const box = (+rv.box || 0) + 1;
+      if (box >= 2) { delete P.review[q.country]; main.textContent += " Review cleared."; }
+      else { P.review[q.country] = { box, due: P.trips + 2 }; main.textContent += " One more correct answer clears it from your review list."; }
+    }
     $("pcOpen").textContent = `Postcard from ${q.capital}`;
     $("pcOpen").onclick = () => openPostcard(q.country);
     $("pcOpen").hidden = false;
@@ -957,7 +991,8 @@ function answer(correct, btn) {
     S.misses.push(q);
     stamp.className = "stamp bad";
     stamp.innerHTML = `Missed<small>Gate closed</small>`;
-    main.textContent = `The capital of ${q.country} is ${q.capital}.` + (S.prev ? ` You stay in ${S.prev.capital}.` : "");
+    main.textContent = `The capital of ${q.country} is ${q.capital}.` + (S.prev ? ` You stay in ${S.prev.capital}.` : "") + " It will come back in your next trips.";
+    P.review[q.country] = { box: 0, due: P.trips + 2 };
   }
   savePassport();
   fb.appendChild(main);
@@ -966,6 +1001,14 @@ function answer(correct, btn) {
     n.className = "note";
     n.textContent = q.note;
     fb.appendChild(n);
+  }
+  const fact = factFor(q, correct ? 1 : 0);
+  if (fact) {
+    const f = document.createElement("span");
+    f.className = "fact";
+    f.innerHTML = '<span class="label">Did you know?</span><span></span>';
+    f.lastChild.textContent = fact;
+    fb.appendChild(f);
   }
   $("stampSlot").appendChild(stamp);
   $("nextBtn").textContent = S.i + 1 < S.deck.length ? "Next flight" : "See trip summary";
@@ -989,7 +1032,7 @@ function finish() {
   $("dKm").textContent = fmt(S.km);
   const list = $("misses");
   list.innerHTML = "";
-  $("missLabel").textContent = S.misses.length ? `Missed flights (${S.misses.length}) — review these` : "Missed flights";
+  $("missLabel").textContent = S.misses.length ? `Layover: the ${S.misses.length === 1 ? "flight" : S.misses.length + " flights"} you missed` : "Missed flights";
   if (!S.misses.length) {
     const li = document.createElement("li");
     li.textContent = "None. Every flight boarded.";
@@ -997,24 +1040,30 @@ function finish() {
   }
   for (const m of S.misses) {
     const li = document.createElement("li");
-    li.innerHTML = "<span></span><span></span>";
-    li.firstChild.textContent = m.country;
-    li.lastChild.textContent = m.capital;
+    li.className = "layover";
+    li.innerHTML = '<div class="miss-head"><span></span><b></b></div>';
+    li.querySelector("span").textContent = m.country;
+    li.querySelector("b").textContent = m.capital;
+    for (const f of FACTS[m.country] || []) { const p = document.createElement("p"); p.textContent = f; li.appendChild(p); }
     list.appendChild(li);
   }
+  const missed = S.misses.slice();
+  $("retryBtn").hidden = !missed.length;
+  $("retryBtn").textContent = missed.length === 1 ? "Retry this one now" : `Retry ${missed.length} missed now`;
+  $("retryBtn").onclick = () => startTrip(cfg, missed);
   const key = cfgKey(cfg);
   const prevBest = store.get(key);
-  const isRecord = !prevBest || S.score / total > prevBest.score / prevBest.total;
+  const isRecord = !S.retry && (!prevBest || S.score / total > prevBest.score / prevBest.total);
   if (isRecord) store.set(key, { score: S.score, total });
   const best = isRecord ? { score: S.score, total } : prevBest;
-  $("dBest").textContent = `${best.score}/${best.total} boarded`;
+  $("dBest").textContent = best ? `${best.score}/${best.total} boarded` : "–";
   const pct = S.score / total;
   $("doneStamp").innerHTML = `<div class="stamp ${pct >= .7 ? "good" : "bad"}">${pct === 1 ? "Perfect trip" : pct >= .7 ? "Welcome home" : "Rebook"}<small>${stampCount(P.stamps)}/${TOTAL} stamps</small></div>`;
   const last = S.prev && S.prev.country;
   $("doneCard").hidden = !last;
   if (last) { $("doneCard").textContent = `Postcard from ${S.prev.capital}`; $("doneCard").onclick = () => openPostcard(last); }
   show("done");
-  $("againBtn").focus();
+  (missed.length ? $("retryBtn") : $("againBtn")).focus();
 }
 
 $("setupForm").addEventListener("submit", e => { e.preventDefault(); startTrip(readCfg()); });
