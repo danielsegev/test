@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Capital Departures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#D8E0E8; --ticket:#FFFFFF; --stub:#F0F3F7; --ink:#14233A; --muted:#58687D;
+  --line:#C6D0DB; --accent:#2346C8; --accent-ink:#FFFFFF; --accent-soft:#E2E8FA;
+  --good:#1B7447; --good-soft:#E0F1E7; --bad:#B3302A; --bad-soft:#F8E2E0;
+  --shadow:0 1px 0 rgba(20,35,58,.05), 0 18px 40px -18px rgba(20,35,58,.35);
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1520; --ticket:#172234; --stub:#1C293D; --ink:#E4EAF3; --muted:#91A2B8;
+    --line:#2E3D54; --accent:#8AA2FF; --accent-ink:#0D1520; --accent-soft:#22305A;
+    --good:#5BCB8E; --good-soft:#173628; --bad:#FF8A80; --bad-soft:#3F1F22;
+    --shadow:0 18px 40px -18px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1520; --ticket:#172234; --stub:#1C293D; --ink:#E4EAF3; --muted:#91A2B8;
+  --line:#2E3D54; --accent:#8AA2FF; --accent-ink:#0D1520; --accent-soft:#22305A;
+  --good:#5BCB8E; --good-soft:#173628; --bad:#FF8A80; --bad-soft:#3F1F22;
+  --shadow:0 18px 40px -18px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:920px;margin:0 auto;padding:28px 16px 48px;display:grid;gap:22px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+/* Header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+.brand h1{margin:0;font:800 clamp(34px,6vw,52px)/.9 var(--display);letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+.brand p{margin:6px 0 0;color:var(--muted);font-size:15px}
+.stats{display:flex;gap:6px;flex-wrap:wrap}
+.stat{min-width:82px;padding:8px 12px;background:var(--ticket);border:1px solid var(--line);border-radius:8px}
+.stat span{display:block;font:600 11px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stat b{display:block;margin-top:4px;font:600 18px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+
+/* Ticket */
+.ticket{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 230px;background:var(--ticket);border-radius:16px;box-shadow:var(--shadow)}
+.main{padding:22px 26px 26px;display:grid;gap:18px;min-width:0}
+.stub{position:relative;background:var(--stub);border-left:2px dashed var(--line);border-radius:0 16px 16px 0;padding:22px 20px;display:grid;align-content:start;gap:14px}
+.stub::before,.stub::after{content:"";position:absolute;left:-13px;width:24px;height:24px;border-radius:50%;background:var(--bg)}
+.stub::before{top:-12px}.stub::after{bottom:-12px}
+.airline{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.airline b{font:800 15px/1 var(--display);letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+.airline span{font:600 12px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.label{font:600 11px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.route{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:12px}
+.route .to{text-align:right}
+.code{font:700 clamp(38px,8vw,56px)/1 var(--mono);letter-spacing:-.02em}
+.city{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.plane{align-self:center;width:54px;height:20px;color:var(--muted)}
+.to .code.unknown{color:var(--accent)}
+.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.fields b{display:block;margin-top:5px;font:600 15px/1.2 var(--mono)}
+.prompt{padding:16px 18px;background:var(--accent-soft);border-radius:10px}
+.prompt .ask{margin:6px 0 2px;font:700 clamp(28px,5vw,40px)/1.05 var(--display);text-wrap:balance}
+.prompt p{margin:0;color:var(--muted);font-size:15px}
+.opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opt{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--ticket);text-align:left;font-weight:600;font-size:17px;cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:active:not(:disabled){transform:translateY(1px)}
+.opt:disabled{cursor:default}
+.opt .k{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:6px;background:var(--stub);font:600 13px var(--mono);color:var(--muted)}
+.opt.correct{border-color:var(--good);background:var(--good-soft)}
+.opt.correct .k{background:var(--good);color:var(--ticket)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad);color:var(--ticket)}
+.typed{display:flex;gap:10px;flex-wrap:wrap}
+.typed input{flex:1 1 220px;min-width:0;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--ticket);font-size:18px}
+.typed input:focus{border-color:var(--accent);outline:none}
+.btn{padding:12px 18px;border-radius:10px;border:1.5px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:700 16px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:hover{filter:brightness(1.07)}
+.feedback{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;min-height:46px}
+.feedback p{margin:0;font-size:16px}
+.feedback .note{display:block;color:var(--muted);font-size:14px}
+
+/* Stub */
+.stub .row b{display:block;margin-top:5px;font:600 15px/1.2 var(--mono);font-variant-numeric:tabular-nums}
+.stamp-slot{min-height:92px;display:grid;place-items:center}
+.stamp{display:inline-block;padding:8px 12px;border:3px solid currentColor;border-radius:8px;font:800 24px/1 var(--display);letter-spacing:.1em;text-transform:uppercase;transform:rotate(-11deg);animation:stamp .28s cubic-bezier(.2,1.6,.4,1) both}
+.stamp small{display:block;margin-top:4px;font:600 10px/1 var(--mono);letter-spacing:.06em}
+.stamp.good{color:var(--good)}.stamp.bad{color:var(--bad)}
+@keyframes stamp{from{transform:rotate(-11deg) scale(1.8);opacity:0}to{transform:rotate(-11deg) scale(1);opacity:1}}
+.barcode{height:44px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 12px);opacity:.75;border-radius:2px}
+
+/* Setup */
+.setup .main{gap:20px}
+fieldset{margin:0;padding:0;border:0;display:grid;gap:8px;min-width:0}
+legend{padding:0;margin-bottom:8px}
+.seg{display:flex;flex-wrap:wrap;align-items:flex-start;align-content:flex-start;gap:6px}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:9px 14px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;font-weight:600;font-size:15px;background:var(--ticket)}
+.seg label:hover{border-color:var(--accent)}
+.seg input:checked+label{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible+label{outline:3px solid var(--accent);outline-offset:2px}
+.setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px}
+.big{font:700 42px/1 var(--mono);font-variant-numeric:tabular-nums}
+
+/* Summary */
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.summary-grid b{display:block;margin-top:6px;font:700 26px/1 var(--mono);font-variant-numeric:tabular-nums}
+.misses{margin:0;padding:0;list-style:none;display:grid;gap:0;border-top:1px solid var(--line)}
+.misses li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.misses li span:last-child{font-weight:600;text-align:right}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.foot{color:var(--muted);font-size:13px;text-align:center}
+.foot kbd{font:600 12px var(--mono);padding:1px 5px;border:1px solid var(--line);border-radius:4px;background:var(--ticket)}
+
+@media (max-width:700px){
+  .ticket{grid-template-columns:minmax(0,1fr)}
+  .stub{border-left:0;border-top:2px dashed var(--line);border-radius:0 0 16px 16px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center}
+  .stub::before,.stub::after{top:-13px;bottom:auto}
+  .stub::before{left:-12px}.stub::after{left:auto;right:-12px}
+  .stub .barcode{grid-column:1/-1}
+  .main{padding:18px 18px 20px}
+  .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .setup-grid{grid-template-columns:minmax(0,1fr)}
+  .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:460px){ .opts{grid-template-columns:minmax(0,1fr)} }
+@media (prefers-reduced-motion: reduce){ .stamp{animation:none} .opt{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Capital Departures</h1>
+      <p>Name the capital, board the flight. Miss it and you stay where you are.</p>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><span>Flight</span><b id="sFlight">–</b></div>
+      <div class="stat"><span>Boarded</span><b id="sScore">0</b></div>
+      <div class="stat"><span>Streak</span><b id="sStreak">0</b></div>
+      <div class="stat"><span>Km flown</span><b id="sKm">0</b></div>
+    </div>
+  </header>
+
+  <!-- Setup -->
+  <section id="setup" class="ticket setup" aria-label="Plan your trip">
+    <form class="main" id="setupForm">
+      <div class="airline"><b>Capital Air</b><span>Check-in</span></div>
+      <div class="setup-grid">
+        <fieldset>
+          <legend class="label">Region</legend>
+          <div class="seg" id="segRegion"></div>
+        </fieldset>
+        <fieldset>
+          <legend class="label">Question</legend>
+          <div class="seg">
+            <input type="radio" name="dir" id="dirC2K" value="c2k" checked><label for="dirC2K">Country → capital</label>
+            <input type="radio" name="dir" id="dirK2C" value="k2c"><label for="dirK2C">Capital → country</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="label">Answer style</legend>
+          <div class="seg">
+            <input type="radio" name="style" id="styleChoice" value="choice" checked><label for="styleChoice">Pick from 4</label>
+            <input type="radio" name="style" id="styleType" value="type"><label for="styleType">Type it</label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend class="label">Trip length</legend>
+          <div class="seg">
+            <input type="radio" name="len" id="len10" value="10" checked><label for="len10">10 flights</label>
+            <input type="radio" name="len" id="len20" value="20"><label for="len20">20 flights</label>
+            <input type="radio" name="len" id="lenAll" value="0"><label for="lenAll">Every capital</label>
+          </div>
+        </fieldset>
+      </div>
+      <div class="actions"><button class="btn" type="submit" id="startBtn">Start trip</button></div>
+    </form>
+    <aside class="stub">
+      <div class="row"><span class="label">Destinations</span><div class="big" id="poolCount">0</div></div>
+      <div class="row"><span class="label">Best on this route</span><b id="bestLine">No trips yet</b></div>
+      <div class="barcode" aria-hidden="true"></div>
+    </aside>
+  </section>
+
+  <!-- Play -->
+  <section id="play" class="ticket" aria-label="Boarding pass" hidden>
+    <div class="main">
+      <div class="airline"><b>Capital Air</b><span>Boarding pass</span></div>
+      <div class="route">
+        <div class="from"><span class="label">From</span><div class="code" id="fromCode">HOM</div><div class="city" id="fromCity">Home</div></div>
+        <svg class="plane" viewBox="0 0 54 20" aria-hidden="true"><path d="M2 10h44" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/><path d="M40 4l12 6-12 6 2-6z" fill="currentColor"/></svg>
+        <div class="to"><span class="label">To</span><div class="code unknown" id="toCode">???</div><div class="city" id="toCity">Answer to find out</div></div>
+      </div>
+      <div class="fields">
+        <div><span class="label">Flight</span><b id="fNo">CA 000</b></div>
+        <div><span class="label">Gate</span><b id="fGate">–</b></div>
+        <div><span class="label">Seat</span><b id="fSeat">–</b></div>
+        <div><span class="label">Region</span><b id="fRegion">–</b></div>
+      </div>
+      <div class="prompt">
+        <span class="label" id="askLabel">Country</span>
+        <div class="ask" id="ask">–</div>
+        <p id="askHint">Which city is its capital?</p>
+      </div>
+      <div class="opts" id="opts"></div>
+      <form class="typed" id="typed" hidden>
+        <input id="typedInput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Your answer" placeholder="Type the capital">
+        <button class="btn" type="submit">Check</button>
+        <button class="btn ghost" type="button" id="skipBtn">Reveal</button>
+      </form>
+      <div class="feedback">
+        <p id="feedback" aria-live="polite"></p>
+        <button class="btn" id="nextBtn" hidden>Next flight</button>
+      </div>
+    </div>
+    <aside class="stub">
+      <div class="row"><span class="label">Leg</span><b id="stLeg">1 / 10</b></div>
+      <div class="row"><span class="label">Distance</span><b id="stDist">Revealed on landing</b></div>
+      <div class="stamp-slot" id="stampSlot"></div>
+      <div class="barcode" aria-hidden="true"></div>
+    </aside>
+  </section>
+
+  <!-- Done -->
+  <section id="done" class="ticket" aria-label="Trip summary" hidden>
+    <div class="main">
+      <div class="airline"><b>Capital Air</b><span>Trip summary</span></div>
+      <div class="summary-grid">
+        <div><span class="label">Boarded</span><b id="dScore">0/0</b></div>
+        <div><span class="label">Accuracy</span><b id="dAcc">0%</b></div>
+        <div><span class="label">Best streak</span><b id="dStreak">0</b></div>
+        <div><span class="label">Km flown</span><b id="dKm">0</b></div>
+      </div>
+      <div>
+        <span class="label" id="missLabel">Missed flights</span>
+        <ul class="misses" id="misses"></ul>
+      </div>
+      <div class="actions">
+        <button class="btn" id="againBtn">Fly this route again</button>
+        <button class="btn ghost" id="changeBtn">Change route</button>
+      </div>
+    </div>
+    <aside class="stub">
+      <div class="row"><span class="label">Best on this route</span><b id="dBest">–</b></div>
+      <div class="stamp-slot" id="doneStamp"></div>
+      <div class="barcode" aria-hidden="true"></div>
+    </aside>
+  </section>
+
+  <p class="foot">Keys: <kbd>1</kbd>–<kbd>4</kbd> pick an answer, <kbd>Enter</kbd> next flight. Distances are great-circle km between capitals.</p>
+</div>
+
+<script>
+// Country | Capital | lat | lon | other accepted capital spellings (;) | other accepted country names (;) | note
+const RAW = {
+Africa: `Algeria|Algiers|36.75|3.06|Alger||
+Angola|Luanda|-8.84|13.23||
+Benin|Porto-Novo|6.50|2.60|||Cotonou is the seat of government.
+Botswana|Gaborone|-24.65|25.91||
+Burkina Faso|Ouagadougou|12.37|-1.52||
+Burundi|Gitega|-3.43|29.93|||Gitega replaced Bujumbura as capital in 2019.
+Cabo Verde|Praia|14.93|-23.51||Cape Verde|
+Cameroon|Yaoundé|3.87|11.52||
+Central African Republic|Bangui|4.39|18.56||CAR|
+Chad|N'Djamena|12.13|15.06|Ndjamena||
+Comoros|Moroni|-11.70|43.26||
+DR Congo|Kinshasa|-4.32|15.31||Democratic Republic of the Congo;DRC;Congo-Kinshasa|
+Republic of the Congo|Brazzaville|-4.27|15.28||Congo;Congo-Brazzaville|
+Djibouti|Djibouti|11.59|43.15|Djibouti City||
+Egypt|Cairo|30.04|31.24||
+Equatorial Guinea|Malabo|3.75|8.78||
+Eritrea|Asmara|15.32|38.93||
+Eswatini|Mbabane|-26.31|31.14||Swaziland|Lobamba is the royal and legislative capital.
+Ethiopia|Addis Ababa|9.03|38.74||
+Gabon|Libreville|0.42|9.47||
+Gambia|Banjul|13.45|-16.58||The Gambia|
+Ghana|Accra|5.60|-0.19||
+Guinea|Conakry|9.64|-13.58||
+Guinea-Bissau|Bissau|11.86|-15.60||
+Côte d'Ivoire|Yamoussoukro|6.83|-5.29||Ivory Coast|Abidjan is the economic centre.
+Kenya|Nairobi|-1.29|36.82||
+Lesotho|Maseru|-29.31|27.48||
+Liberia|Monrovia|6.30|-10.80||
+Libya|Tripoli|32.89|13.19||
+Madagascar|Antananarivo|-18.88|47.51||
+Malawi|Lilongwe|-13.96|33.79||
+Mali|Bamako|12.64|-8.00||
+Mauritania|Nouakchott|18.08|-15.98||
+Mauritius|Port Louis|-20.16|57.50||
+Morocco|Rabat|34.02|-6.84||
+Mozambique|Maputo|-25.97|32.57||
+Namibia|Windhoek|-22.56|17.08||
+Niger|Niamey|13.51|2.11||
+Nigeria|Abuja|9.08|7.40|||Lagos was the capital until 1991.
+Rwanda|Kigali|-1.94|30.06||
+São Tomé and Príncipe|São Tomé|0.34|6.73||Sao Tome|
+Senegal|Dakar|14.72|-17.47||
+Seychelles|Victoria|-4.62|55.45||
+Sierra Leone|Freetown|8.48|-13.23||
+Somalia|Mogadishu|2.05|45.32||
+South Africa|Pretoria|-25.75|28.19||RSA|Pretoria is the executive capital; Cape Town is legislative and Bloemfontein judicial.
+South Sudan|Juba|4.85|31.58||
+Sudan|Khartoum|15.50|32.56||
+Tanzania|Dodoma|-6.16|35.75|||Dar es Salaam is the largest city.
+Togo|Lomé|6.13|1.22||
+Tunisia|Tunis|36.81|10.18||
+Uganda|Kampala|0.35|32.58||
+Zambia|Lusaka|-15.39|28.32||
+Zimbabwe|Harare|-17.83|31.05||`,
+Americas: `Antigua and Barbuda|St. John's|17.12|-61.85|Saint John's;St Johns||
+Argentina|Buenos Aires|-34.60|-58.38||
+Bahamas|Nassau|25.05|-77.35||The Bahamas|
+Barbados|Bridgetown|13.10|-59.62||
+Belize|Belmopan|17.25|-88.77||
+Bolivia|Sucre|-19.03|-65.26|La Paz||Sucre is the constitutional capital; La Paz is the seat of government.
+Brazil|Brasília|-15.79|-47.88||
+Canada|Ottawa|45.42|-75.70||
+Chile|Santiago|-33.45|-70.67||
+Colombia|Bogotá|4.71|-74.07||
+Costa Rica|San José|9.93|-84.08||
+Cuba|Havana|23.11|-82.37|La Habana||
+Dominica|Roseau|15.30|-61.39||
+Dominican Republic|Santo Domingo|18.49|-69.93||
+Ecuador|Quito|-0.18|-78.47||
+El Salvador|San Salvador|13.69|-89.22||
+Grenada|St. George's|12.06|-61.75|Saint George's;St Georges||
+Guatemala|Guatemala City|14.63|-90.51|Guatemala||
+Guyana|Georgetown|6.80|-58.16||
+Haiti|Port-au-Prince|18.54|-72.34||
+Honduras|Tegucigalpa|14.07|-87.19||
+Jamaica|Kingston|17.97|-76.79||
+Mexico|Mexico City|19.43|-99.13|Mexico;Ciudad de Mexico;CDMX||
+Nicaragua|Managua|12.11|-86.24||
+Panama|Panama City|8.98|-79.52|Panama||
+Paraguay|Asunción|-25.26|-57.58||
+Peru|Lima|-12.05|-77.04||
+Saint Kitts and Nevis|Basseterre|17.30|-62.72||St Kitts and Nevis|
+Saint Lucia|Castries|14.01|-60.99||St Lucia|
+Saint Vincent and the Grenadines|Kingstown|13.16|-61.22||St Vincent and the Grenadines;St Vincent|
+Suriname|Paramaribo|5.85|-55.20||
+Trinidad and Tobago|Port of Spain|10.66|-61.51||
+United States|Washington, D.C.|38.90|-77.04|Washington;Washington DC|USA;US;United States of America;America|
+Uruguay|Montevideo|-34.90|-56.16||
+Venezuela|Caracas|10.48|-66.90||`,
+Asia: `Afghanistan|Kabul|34.53|69.17||
+Armenia|Yerevan|40.18|44.51||
+Azerbaijan|Baku|40.41|49.87||
+Bahrain|Manama|26.23|50.59||
+Bangladesh|Dhaka|23.81|90.41|Dacca||
+Bhutan|Thimphu|27.47|89.64||
+Brunei|Bandar Seri Begawan|4.90|114.94||
+Cambodia|Phnom Penh|11.56|104.93||
+China|Beijing|39.90|116.41|Peking||
+Georgia|Tbilisi|41.72|44.79||
+India|New Delhi|28.61|77.21|Delhi||
+Indonesia|Jakarta|-6.21|106.85|||Nusantara is being built as the future capital.
+Iran|Tehran|35.69|51.39||
+Iraq|Baghdad|33.31|44.36||
+Israel|Jerusalem|31.77|35.21|||Israel designates Jerusalem as its capital; many countries keep embassies in Tel Aviv.
+Japan|Tokyo|35.68|139.69||
+Jordan|Amman|31.95|35.93||
+Kazakhstan|Astana|51.17|71.45|Nur-Sultan||
+Kuwait|Kuwait City|29.38|47.99|Kuwait||
+Kyrgyzstan|Bishkek|42.87|74.59||
+Laos|Vientiane|17.98|102.63||
+Lebanon|Beirut|33.89|35.50||
+Malaysia|Kuala Lumpur|3.14|101.69|||Putrajaya is the administrative centre.
+Maldives|Malé|4.18|73.51||
+Mongolia|Ulaanbaatar|47.89|106.91|Ulan Bator||
+Myanmar|Naypyidaw|19.76|96.08|Nay Pyi Taw|Burma|Yangon was the capital until 2006.
+Nepal|Kathmandu|27.72|85.32||
+North Korea|Pyongyang|39.04|125.76||DPRK|
+Oman|Muscat|23.59|58.41||
+Pakistan|Islamabad|33.68|73.05||
+Philippines|Manila|14.60|120.98||
+Qatar|Doha|25.29|51.53||
+Saudi Arabia|Riyadh|24.71|46.68||
+Singapore|Singapore|1.35|103.82||
+South Korea|Seoul|37.57|126.98||Korea|
+Sri Lanka|Sri Jayawardenepura Kotte|6.89|79.92|Kotte;Colombo||Colombo is the executive and commercial capital.
+Syria|Damascus|33.51|36.29||
+Tajikistan|Dushanbe|38.56|68.79||
+Thailand|Bangkok|13.76|100.50||
+Timor-Leste|Dili|-8.56|125.57||East Timor|
+Turkey|Ankara|39.93|32.86||Türkiye|
+Turkmenistan|Ashgabat|37.96|58.33||
+United Arab Emirates|Abu Dhabi|24.45|54.38||UAE|
+Uzbekistan|Tashkent|41.30|69.24||
+Vietnam|Hanoi|21.03|105.85||
+Yemen|Sanaa|15.37|44.19|Sana'a||`,
+Europe: `Albania|Tirana|41.33|19.82||
+Andorra|Andorra la Vella|42.51|1.52||
+Austria|Vienna|48.21|16.37|Wien||
+Belarus|Minsk|53.90|27.56||
+Belgium|Brussels|50.85|4.35||
+Bosnia and Herzegovina|Sarajevo|43.86|18.41||Bosnia|
+Bulgaria|Sofia|42.70|23.32||
+Croatia|Zagreb|45.81|15.98||
+Cyprus|Nicosia|35.19|33.38||
+Czechia|Prague|50.08|14.44|Praha|Czech Republic|
+Denmark|Copenhagen|55.68|12.57||
+Estonia|Tallinn|59.44|24.75||
+Finland|Helsinki|60.17|24.94||
+France|Paris|48.86|2.35||
+Germany|Berlin|52.52|13.40|||Bonn was the West German capital until 1990.
+Greece|Athens|37.98|23.73||
+Hungary|Budapest|47.50|19.04||
+Iceland|Reykjavík|64.15|-21.94||
+Ireland|Dublin|53.35|-6.26||
+Italy|Rome|41.90|12.50|Roma||
+Latvia|Riga|56.95|24.11||
+Liechtenstein|Vaduz|47.14|9.52||
+Lithuania|Vilnius|54.69|25.28||
+Luxembourg|Luxembourg|49.61|6.13|Luxembourg City||
+Malta|Valletta|35.90|14.51||
+Moldova|Chișinău|47.01|28.86|Kishinev||
+Monaco|Monaco|43.73|7.42||
+Montenegro|Podgorica|42.44|19.26||
+Netherlands|Amsterdam|52.37|4.90||Holland|The Hague is the seat of government.
+North Macedonia|Skopje|41.99|21.43||Macedonia|
+Norway|Oslo|59.91|10.75||
+Poland|Warsaw|52.23|21.01||
+Portugal|Lisbon|38.72|-9.14|Lisboa||
+Romania|Bucharest|44.43|26.10||
+Russia|Moscow|55.76|37.62||
+San Marino|San Marino|43.94|12.45||
+Serbia|Belgrade|44.79|20.45||
+Slovakia|Bratislava|48.15|17.11||
+Slovenia|Ljubljana|46.06|14.51||
+Spain|Madrid|40.42|-3.70||
+Sweden|Stockholm|59.33|18.07||
+Switzerland|Bern|46.95|7.45|Berne||
+Ukraine|Kyiv|50.45|30.52|Kiev||
+United Kingdom|London|51.51|-0.13||UK;Britain;Great Britain|
+Vatican City|Vatican City|41.90|12.45|Vatican|Vatican;Holy See|`,
+Oceania: `Australia|Canberra|-35.28|149.13||
+Fiji|Suva|-18.14|178.44||
+Kiribati|South Tarawa|1.33|172.98|Tarawa||
+Marshall Islands|Majuro|7.09|171.38||
+Micronesia|Palikir|6.92|158.16||Federated States of Micronesia|
+Nauru|Yaren|-0.55|166.92|||Nauru has no official capital; Yaren hosts the government.
+New Zealand|Wellington|-41.29|174.78||
+Palau|Ngerulmud|7.50|134.62||
+Papua New Guinea|Port Moresby|-9.44|147.18||PNG|
+Samoa|Apia|-13.83|-171.76||
+Solomon Islands|Honiara|-9.43|159.95||
+Tonga|Nukuʻalofa|-21.14|-175.20|Nukualofa||
+Tuvalu|Funafuti|-8.52|179.20||
+Vanuatu|Port Vila|-17.73|168.32||`
+};
+
+const DATA = [];
+for (const [region, block] of Object.entries(RAW)) {
+  for (const line of block.split("\n")) {
+    if (!line.trim()) continue;
+    const [country, capital, lat, lon, capAlts = "", countryAlts = "", note = ""] = line.split("|");
+    DATA.push({
+      country, capital, region, lat: +lat, lon: +lon, note,
+      capAlts: capAlts ? capAlts.split(";") : [],
+      countryAlts: countryAlts ? countryAlts.split(";") : []
+    });
+  }
+}
+
+const $ = id => document.getElementById(id);
+const norm = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
+  .replace(/\bthe\b/g, "").replace(/\bsaint\b/g, "st").replace(/[^a-z0-9]/g, "");
+const code = s => (norm(s).replace(/^st/, "s") + "xxx").slice(0, 3).toUpperCase();
+const fmt = n => Math.round(n).toLocaleString("en-US");
+const rand = n => Math.floor(Math.random() * n);
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
+function km(a, b) {
+  const R = 6371, rad = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * rad, dLon = (b.lon - a.lon) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+const REGIONS = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"];
+$("segRegion").innerHTML = REGIONS.map((r, i) =>
+  `<input type="radio" name="region" id="reg${r}" value="${r}"${i ? "" : " checked"}><label for="reg${r}">${r}</label>`
+).join("");
+
+let cfg, S;
+
+function readCfg() {
+  const f = $("setupForm");
+  return { region: f.region.value, dir: f.dir.value, style: f.style.value, len: +f.len.value };
+}
+const cfgKey = c => `capdep-best-${c.region}-${c.dir}-${c.style}-${c.len}`;
+const pool = c => DATA.filter(d => c.region === "All" || d.region === c.region);
+
+function refreshSetup() {
+  const c = readCfg();
+  const n = pool(c).length;
+  $("poolCount").textContent = c.len ? Math.min(c.len, n) : n;
+  const best = store.get(cfgKey(c));
+  $("bestLine").textContent = best ? `${best.score}/${best.total} boarded` : "No trips yet";
+}
+$("setupForm").addEventListener("change", refreshSetup);
+
+function show(id) {
+  for (const s of ["setup", "play", "done"]) $(s).hidden = s !== id;
+}
+
+function startTrip(c) {
+  cfg = c;
+  const deck = shuffle(pool(c).slice());
+  S = { deck: c.len ? deck.slice(0, c.len) : deck, i: 0, score: 0, streak: 0, best: 0, km: 0, prev: null, misses: [], answered: false };
+  show("play");
+  ask();
+}
+
+function updateStats() {
+  $("sFlight").textContent = S ? `${Math.min(S.i + 1, S.deck.length)}/${S.deck.length}` : "–";
+  $("sScore").textContent = S ? S.score : 0;
+  $("sStreak").textContent = S ? S.streak : 0;
+  $("sKm").textContent = S ? fmt(S.km) : 0;
+}
+
+function ask() {
+  const q = S.deck[S.i];
+  const c2k = cfg.dir === "c2k";
+  S.answered = false;
+  $("fromCode").textContent = S.prev ? code(S.prev.capital) : "HOM";
+  $("fromCity").textContent = S.prev ? `${S.prev.capital}, ${S.prev.country}` : "Home";
+  $("toCode").textContent = "???";
+  $("toCode").classList.add("unknown");
+  $("toCity").textContent = "Answer to find out";
+  $("fNo").textContent = `CA ${String(100 + rand(900))}`;
+  $("fGate").textContent = "ABCDE"[rand(5)] + (1 + rand(40));
+  $("fSeat").textContent = (1 + rand(38)) + "ABCDEF"[rand(6)];
+  $("fRegion").textContent = q.region;
+  $("askLabel").textContent = c2k ? "Country" : "Capital";
+  $("ask").textContent = c2k ? q.country : q.capital;
+  $("askHint").textContent = c2k ? "Which city is its capital?" : "Which country is this the capital of?";
+  $("stLeg").textContent = `${S.i + 1} / ${S.deck.length}`;
+  $("stDist").textContent = "Revealed on landing";
+  $("stampSlot").innerHTML = "";
+  $("feedback").innerHTML = "";
+  $("nextBtn").hidden = true;
+
+  const label = d => c2k ? d.capital : d.country;
+  if (cfg.style === "choice") {
+    $("typed").hidden = true;
+    $("opts").hidden = false;
+    const same = shuffle(DATA.filter(d => d !== q && d.region === q.region));
+    const rest = shuffle(DATA.filter(d => d !== q && d.region !== q.region));
+    const picks = [q];
+    for (const d of same.concat(rest)) {
+      if (picks.length === 4) break;
+      if (!picks.some(p => label(p) === label(d))) picks.push(d);
+    }
+    shuffle(picks);
+    $("opts").innerHTML = "";
+    picks.forEach((d, i) => {
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.type = "button";
+      b.innerHTML = `<span class="k">${i + 1}</span><span></span>`;
+      b.lastChild.textContent = label(d);
+      b.onclick = () => answer(d === q, b);
+      b._correct = d === q;
+      $("opts").appendChild(b);
+    });
+  } else {
+    $("opts").hidden = true;
+    $("typed").hidden = false;
+    $("typedInput").value = "";
+    $("typedInput").disabled = false;
+    $("typedInput").placeholder = c2k ? "Type the capital" : "Type the country";
+    $("typedInput").focus();
+  }
+  updateStats();
+}
+
+function isMatch(input, q) {
+  const n = norm(input);
+  if (!n) return false;
+  const accepted = cfg.dir === "c2k" ? [q.capital, ...q.capAlts] : [q.country, ...q.countryAlts];
+  return accepted.some(a => norm(a) === n);
+}
+
+function answer(correct, btn) {
+  if (S.answered) return;
+  S.answered = true;
+  const q = S.deck[S.i];
+  const c2k = cfg.dir === "c2k";
+
+  if (cfg.style === "choice") {
+    for (const b of $("opts").children) {
+      b.disabled = true;
+      if (b._correct) b.classList.add("correct");
+    }
+    if (!correct && btn) btn.classList.add("wrong");
+  } else {
+    $("typedInput").disabled = true;
+  }
+
+  const dist = S.prev ? km(S.prev, q) : 0;
+  $("toCode").textContent = code(q.capital);
+  $("toCode").classList.remove("unknown");
+  $("toCity").textContent = `${q.capital}, ${q.country}`;
+  $("stDist").textContent = S.prev ? `${fmt(dist)} km` : "First leg";
+
+  const stamp = document.createElement("div");
+  const fb = $("feedback");
+  fb.innerHTML = "";
+  const main = document.createElement("span");
+  if (correct) {
+    S.score++; S.streak++; S.best = Math.max(S.best, S.streak); S.km += dist;
+    stamp.className = "stamp good";
+    stamp.innerHTML = `Boarded<small>${code(q.capital)} · ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short" }).toUpperCase()}</small>`;
+    main.textContent = c2k ? `Correct. ${q.capital} is the capital of ${q.country}.` : `Correct. ${q.capital} is in ${q.country}.`;
+    S.prev = q;
+  } else {
+    S.streak = 0;
+    S.misses.push(q);
+    stamp.className = "stamp bad";
+    stamp.innerHTML = `Missed<small>Gate closed</small>`;
+    main.textContent = `The capital of ${q.country} is ${q.capital}.` + (S.prev ? ` You stay in ${S.prev.capital}.` : "");
+  }
+  fb.appendChild(main);
+  if (q.note) {
+    const n = document.createElement("span");
+    n.className = "note";
+    n.textContent = q.note;
+    fb.appendChild(n);
+  }
+  $("stampSlot").appendChild(stamp);
+  $("nextBtn").textContent = S.i + 1 < S.deck.length ? "Next flight" : "See trip summary";
+  $("nextBtn").hidden = false;
+  $("nextBtn").focus();
+  updateStats();
+}
+
+function next() {
+  S.i++;
+  if (S.i < S.deck.length) ask(); else finish();
+}
+
+function finish() {
+  const total = S.deck.length;
+  $("dScore").textContent = `${S.score}/${total}`;
+  $("dAcc").textContent = `${Math.round(100 * S.score / total)}%`;
+  $("dStreak").textContent = S.best;
+  $("dKm").textContent = fmt(S.km);
+  const list = $("misses");
+  list.innerHTML = "";
+  $("missLabel").textContent = S.misses.length ? `Missed flights (${S.misses.length}) — review these` : "Missed flights";
+  if (!S.misses.length) {
+    const li = document.createElement("li");
+    li.textContent = "None. Every flight boarded.";
+    list.appendChild(li);
+  }
+  for (const m of S.misses) {
+    const li = document.createElement("li");
+    li.innerHTML = "<span></span><span></span>";
+    li.firstChild.textContent = m.country;
+    li.lastChild.textContent = m.capital;
+    list.appendChild(li);
+  }
+  const key = cfgKey(cfg);
+  const prevBest = store.get(key);
+  const isRecord = !prevBest || S.score / total > prevBest.score / prevBest.total;
+  if (isRecord) store.set(key, { score: S.score, total });
+  const best = isRecord ? { score: S.score, total } : prevBest;
+  $("dBest").textContent = `${best.score}/${best.total} boarded`;
+  const pct = S.score / total;
+  $("doneStamp").innerHTML = `<div class="stamp ${pct >= .7 ? "good" : "bad"}">${pct === 1 ? "Perfect trip" : pct >= .7 ? "Welcome home" : "Rebook"}<small>${isRecord && prevBest ? "New route record" : `${Math.round(pct * 100)}% on time`}</small></div>`;
+  show("done");
+  $("againBtn").focus();
+}
+
+$("setupForm").addEventListener("submit", e => { e.preventDefault(); startTrip(readCfg()); });
+$("typed").addEventListener("submit", e => {
+  e.preventDefault();
+  if (S.answered) return;
+  const v = $("typedInput").value;
+  if (!v.trim()) return;
+  answer(isMatch(v, S.deck[S.i]));
+});
+$("skipBtn").onclick = () => answer(false);
+$("nextBtn").onclick = next;
+$("againBtn").onclick = () => startTrip(cfg);
+$("changeBtn").onclick = () => { S = null; updateStats(); refreshSetup(); show("setup"); };
+
+document.addEventListener("keydown", e => {
+  if ($("play").hidden || !S || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (!S.answered && cfg.style === "choice" && /^[1-4]$/.test(e.key)) {
+    const b = $("opts").children[+e.key - 1];
+    if (b) b.click();
+  } else if (S.answered && e.key === "Enter" && document.activeElement !== $("nextBtn")) {
+    e.preventDefault();
+    next();
+  }
+});
+
+refreshSetup();
+</script>
+</body>
+</html>
