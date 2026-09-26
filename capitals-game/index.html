@@ -176,6 +176,26 @@ legend{padding:0;margin-bottom:8px}
 .bar i{display:block;height:100%;background:var(--accent)}
 .empty{padding:18px 0;color:var(--muted)}
 
+/* Daily Flight */
+.daily{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 28px;align-items:center;padding:22px 26px;border-radius:16px;background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow)}
+.daily .label{color:inherit;opacity:.85}
+.daily h2{margin:6px 0 6px;font:800 clamp(24px,4vw,32px)/1.05 var(--display);text-transform:uppercase;text-wrap:balance}
+.daily p{margin:0;max-width:60ch}
+.daily-side{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.daily-streak{text-align:center}
+.daily-streak b{display:block;font:700 40px/1 var(--mono);font-variant-numeric:tabular-nums}
+.daily-streak span{font:600 11px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.daily .btn{background:var(--accent-ink);color:var(--accent);border-color:var(--accent-ink)}
+.daily .btn:disabled{opacity:.6;cursor:default}
+.marks{display:inline-flex;gap:4px;vertical-align:-2px}
+.marks i{width:14px;height:14px;border-radius:3px;background:var(--bad)}
+.marks i.ok{background:var(--good)}
+.daily .marks i{box-shadow:0 0 0 1.5px var(--accent-ink)}
+.share{display:grid;gap:10px;padding:14px 16px;background:var(--stub);border-radius:10px}
+.share textarea{width:100%;min-height:84px;resize:none;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--ticket);color:var(--ink);font:500 15px/1.5 var(--mono)}
+.board-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.today{display:flex;align-items:center;gap:8px}
+
 /* Facts and review */
 .fact{display:grid;gap:4px;margin-top:10px;padding:10px 12px;background:var(--stub);border-radius:8px;font-size:15px;line-height:1.45}
 .review-pill{margin-left:8px;vertical-align:1px}
@@ -200,6 +220,7 @@ button.st{font:inherit;font-size:12px;cursor:pointer}
 button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
 
 @media (max-width:700px){
+  .daily{grid-template-columns:minmax(0,1fr);padding:18px}
   .pc-grid{grid-template-columns:minmax(0,1fr)}
   .book{padding:18px 18px 20px}
   .ticket{grid-template-columns:minmax(0,1fr)}
@@ -239,6 +260,19 @@ button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
     </div>
     <p class="sync" id="sync" data-state="local">Saved on this device</p>
   </nav>
+
+  <!-- Daily Flight -->
+  <section id="dailyCard" class="daily" aria-label="Daily Flight">
+    <div>
+      <span class="label">Daily Flight · <span id="dailyDate">today</span></span>
+      <h2>Five capitals, one per continent. Same flight for everyone.</h2>
+      <p id="dailyStatus">One attempt a day. Score first, time breaks ties.</p>
+    </div>
+    <div class="daily-side">
+      <div class="daily-streak"><b id="dailyStreakN">0</b><span>Day streak</span></div>
+      <button class="btn" id="dailyBtn" type="button">Board today's flight</button>
+    </div>
+  </section>
 
   <!-- Setup -->
   <section id="setup" class="ticket setup" aria-label="Plan your trip">
@@ -330,6 +364,11 @@ button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
         <div><span class="label">New stamps</span><b id="dNew">0</b></div>
         <div><span class="label">Km flown</span><b id="dKm">0</b></div>
       </div>
+      <div class="share" id="dailyShare" hidden>
+        <label class="label" for="shareText">Share your result</label>
+        <textarea id="shareText" readonly></textarea>
+        <div class="actions"><button class="btn" id="copyBtn" type="button">Copy result</button><span class="hint" id="copyMsg" aria-live="polite"></span></div>
+      </div>
       <div>
         <span class="label" id="missLabel">Missed flights</span>
         <ul class="misses" id="misses"></ul>
@@ -342,7 +381,7 @@ button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
       </div>
     </div>
     <aside class="stub">
-      <div class="row"><span class="label">Best on this route</span><b id="dBest">–</b></div>
+      <div class="row"><span class="label" id="dBestLabel">Best on this route</span><b id="dBest">–</b></div>
       <div class="stamp-slot" id="doneStamp"></div>
       <div class="barcode" aria-hidden="true"></div>
     </aside>
@@ -394,12 +433,19 @@ button.st:hover{box-shadow:0 0 0 3px var(--accent-soft)}
   <!-- Leaderboard -->
   <section id="boardView" class="book" aria-label="Friends board" hidden>
     <div class="book-head">
-      <div><span class="label">Departures · ranked by stamps</span><h2>Friends board</h2></div>
+      <div><span class="label" id="boardEyebrow">Departures · ranked by stamps</span><h2>Friends board</h2></div>
+    </div>
+    <div class="board-tools">
+      <span class="label">Rank by</span>
+      <div class="seg">
+        <input type="radio" name="boardMode" id="modeStamps" value="stamps" checked><label for="modeStamps">Passport stamps</label>
+        <input type="radio" name="boardMode" id="modeToday" value="today"><label for="modeToday">Today's Daily Flight</label>
+      </div>
     </div>
     <p class="board-note" id="boardNote">You earn a stamp the first time you name a country's capital correctly. The passport with the most stamps leads. Ties go to whoever has boarded more flights.</p>
     <div class="table-wrap">
       <table class="board">
-        <thead><tr><th>#</th><th>Traveller</th><th>Stamps</th><th class="num">Boarded</th><th class="num">Accuracy</th><th class="num">Km flown</th><th class="num">Best streak</th></tr></thead>
+        <thead><tr><th>#</th><th>Traveller</th><th>Stamps</th><th>Today</th><th class="num">Daily streak</th><th class="num">Boarded</th><th class="num">Accuracy</th><th class="num">Km flown</th><th class="num">Best streak</th></tr></thead>
         <tbody id="boardBody"></tbody>
       </table>
     </div>
@@ -1427,10 +1473,11 @@ $("segRegion").innerHTML = REGIONS.map((r, i) =>
 ).join("");
 
 /* ---------- Passport: saved locally, synced to the shared board when available ---------- */
-const blankPassport = () => ({ stamps: {}, review: {}, flights: 0, boarded: 0, km: 0, bestStreak: 0, trips: 0 });
+const blankPassport = () => ({ stamps: {}, review: {}, daily: {}, flights: 0, boarded: 0, km: 0, bestStreak: 0, trips: 0 });
 const localP = store.get("capdep-passport");
 let P = Object.assign(blankPassport(), localP && typeof localP === "object" ? localP : {});
 if (!P.review || typeof P.review !== "object") P.review = {};
+if (!P.daily || typeof P.daily !== "object") P.daily = {};
 const net = { db: null, user: null, id: null, ref: null, name: "", writable: true, saving: false, dirty: false, board: [] };
 
 // Shared data is written by other viewers: only count stamps for real countries.
@@ -1439,7 +1486,7 @@ const stampCount = stamps => Object.keys(stamps || {}).filter(k => BY_COUNTRY[k]
 function passportBody() {
   return {
     stamps: P.stamps, stampCount: stampCount(P.stamps), flights: P.flights, boarded: P.boarded,
-    km: Math.round(P.km), bestStreak: P.bestStreak, trips: P.trips, review: P.review, updatedAt: Date.now()
+    km: Math.round(P.km), bestStreak: P.bestStreak, trips: P.trips, review: P.review, daily: recentDaily(P.daily), dailyStreak: dailyStreak(P.daily), updatedAt: Date.now()
   };
 }
 
@@ -1448,6 +1495,7 @@ function mergeRemote(d) {
   const remote = d.stamps && typeof d.stamps === "object" ? d.stamps : {};
   m.stamps = { ...remote };
   m.review = { ...(d.review && typeof d.review === "object" ? d.review : {}), ...P.review };
+  m.daily = { ...(d.daily && typeof d.daily === "object" ? d.daily : {}), ...P.daily };
   for (const [k, t] of Object.entries(P.stamps)) m.stamps[k] = remote[k] ? Math.min(remote[k], t) : t;
   for (const f of ["flights", "boarded", "km", "bestStreak", "trips"]) m[f] = Math.max(+d[f] || 0, +P[f] || 0);
   return m;
@@ -1560,7 +1608,15 @@ async function renderBoard() {
     .filter(r => r.id !== myId)
     .map(r => ({ ...r, count: stampCount(r.stamps) }));
   rows.push({ id: myId, ...passportBody(), count: stampCount(P.stamps), me: true });
-  rows.sort((a, b) => b.count - a.count || (+b.boarded || 0) - (+a.boarded || 0));
+  const key = todayKey();
+  for (const r of rows) {
+    const t = r.daily && r.daily[key];
+    r.today = validDay(t) ? { score: +t.score || 0, ms: +t.ms || 0, marks: String(t.marks).replace(/[^01]/g, "").slice(0, 5), done: !!t.done } : null;
+    r.dstreak = r.me ? dailyStreak(P.daily) : dailyStreak(r.daily);
+  }
+  const mode = boardMode();
+  if (mode === "today") rows.sort((a, b) => (!!b.today - !!a.today) || (b.today && a.today ? b.today.score - a.today.score || a.today.ms - b.today.ms : 0) || b.count - a.count);
+  else rows.sort((a, b) => b.count - a.count || (+b.boarded || 0) - (+a.boarded || 0));
 
   let people = {};
   if (net.user && net.id) people = await net.user.profiles(rows.map(r => r.id));
@@ -1574,9 +1630,11 @@ async function renderBoard() {
     if (r.me) tr.className = "me";
     const flights = +r.flights || 0, boarded = +r.boarded || 0;
     tr.innerHTML = `
-      <td class="rank">${i + 1}</td>
-      <td><div class="who">${p ? `<img alt="" src="">` : ""}<span class="nm"></span>${r.me && ((p && p.name) || net.name) ? '<span class="pill">You</span>' : ""}${i === 0 && r.count > 0 ? '<span class="pill gold">Top passport</span>' : ""}</div></td>
+      <td class="rank">${mode === "today" && !r.today ? "–" : i + 1}</td>
+      <td><div class="who">${p ? `<img alt="" src="">` : ""}<span class="nm"></span>${r.me && ((p && p.name) || net.name) ? '<span class="pill">You</span>' : ""}${i === 0 && (mode === "today" ? r.today && r.today.score > 0 : r.count > 0) ? `<span class="pill gold">${mode === "today" ? "Today's leader" : "Top passport"}</span>` : ""}</div></td>
       <td><div class="meter"><b>${r.count}</b><div class="bar"><i style="width:${(100 * r.count / TOTAL).toFixed(1)}%"></i></div></div></td>
+      <td>${r.today ? `<div class="today">${marksHTML(r.today.marks)}<span class="num">${r.today.score}/5 · ${r.today.done ? clock(r.today.ms) : "left early"}</span></div>` : '<span class="hint">Not flown yet</span>'}</td>
+      <td class="num">${fmt(r.dstreak)}</td>
       <td class="num">${fmt(boarded)}</td>
       <td class="num">${flights ? Math.round(100 * boarded / flights) + "%" : "–"}</td>
       <td class="num">${fmt(+r.km || 0)}</td>
@@ -1586,15 +1644,105 @@ async function renderBoard() {
     body.appendChild(tr);
   });
 
+  $("boardEyebrow").textContent = mode === "today" ? "Departures · ranked by today's Daily Flight" : "Departures · ranked by stamps";
   const note = $("boardNote");
-  const base = "You earn a stamp the first time you name a country's capital correctly. The passport with the most stamps leads. Ties go to whoever has boarded more flights.";
+  const base = mode === "today" ? "Everyone flies the same five capitals today. Most boarded wins, and the faster time breaks ties." : "You earn a stamp the first time you name a country's capital correctly. The passport with the most stamps leads. Ties go to whoever has boarded more flights.";
   note.textContent = net.ref ? base : base + " Only your own passport shows here. Open the shared Capital Departures page to compete with friends.";
 }
+
+/* ---------- Daily Flight: same five capitals for everyone, changes at midnight UTC ---------- */
+const DAY = 864e5;
+const dayKey = t => new Date(t).toISOString().slice(0, 10);
+const todayKey = () => dayKey(Date.now());
+const clock = ms => { const s = Math.max(0, Math.round((+ms || 0) / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+const validDay = v => v && typeof v === "object" && typeof v.marks === "string";
+
+function recentDaily(daily) {
+  const keys = Object.keys(daily || {}).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k)).sort().slice(-60);
+  return Object.fromEntries(keys.map(k => [k, daily[k]]));
+}
+function dailyStreak(daily) {
+  daily = daily || {};
+  let n = 0, t = Date.now();
+  if (!validDay(daily[dayKey(t)])) t -= DAY;
+  while (validDay(daily[dayKey(t)])) { n++; t -= DAY; }
+  return n;
+}
+function dailyPlan(key) {
+  const r = rng32(hashStr("daily-" + key));
+  const pick = a => a[Math.floor(r() * a.length)];
+  const mix = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const deck = mix(["Africa", "Americas", "Asia", "Europe", "Oceania"].map(reg => pick(DATA.filter(d => d.region === reg))));
+  const opts = deck.map(q => {
+    const pool = DATA.filter(d => d !== q && d.region === q.region), picks = [q];
+    while (picks.length < 4) { const d = pick(pool); if (!picks.includes(d)) picks.push(d); }
+    return mix(picks);
+  });
+  return { deck, opts };
+}
+function marksHTML(marks) {
+  return `<span class="marks" aria-label="${[...marks].filter(m => m === "1").length} of ${marks.length} correct">` +
+    [...marks].map(m => `<i class="${m === "1" ? "ok" : ""}"></i>`).join("") + "</span>";
+}
+function shareText(key, rec) {
+  const date = new Date(key + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  const squares = [...rec.marks].map(m => m === "1" ? "🟩" : "🟥").join("");
+  return `Capital Departures · Daily Flight ${date}\n${squares} ${rec.score}/5 in ${clock(rec.ms)}\nDaily streak: ${dailyStreak(P.daily)}`;
+}
+
+function renderDaily() {
+  const key = todayKey(), rec = P.daily[key];
+  $("dailyDate").textContent = new Date(key + "T12:00:00Z").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+  $("dailyStreakN").textContent = dailyStreak(P.daily);
+  const left = DAY - (Date.now() % DAY), h = Math.floor(left / 36e5), m = Math.floor(left % 36e5 / 6e4);
+  const status = $("dailyStatus"), btn = $("dailyBtn");
+  if (validDay(rec)) {
+    status.innerHTML = `${marksHTML(rec.marks)} <span></span>`;
+    status.lastChild.textContent = (rec.done ? ` You boarded ${rec.score}/5 in ${clock(rec.ms)}.` : ` You left after ${rec.marks.length} of 5 flights, with ${rec.score} boarded.`) + ` Next Daily Flight in ${h}h ${m}m.`;
+    btn.textContent = "Copy result";
+    btn.disabled = false;
+  } else {
+    status.textContent = "One attempt a day. Score first, time breaks ties. Starting the flight uses today's attempt.";
+    btn.textContent = "Board today's flight";
+  }
+}
+
+function startDaily() {
+  const key = todayKey();
+  if (P.daily[key]) return;
+  const plan = dailyPlan(key);
+  cfg = { region: "All", dir: "c2k", style: "choice", len: 5 };
+  S = { deck: plan.deck, opts: plan.opts, daily: key, t0: Date.now(), marks: "", retry: false, i: 0, score: 0, streak: 0, best: 0, km: 0, prev: null, misses: [], fresh: 0, answered: false };
+  P.daily[key] = { score: 0, marks: "", ms: 0, done: false };
+  savePassport();
+  show("play");
+  ask();
+}
+
+async function copyText(text, msgEl, fallbackEl) {
+  try { await navigator.clipboard.writeText(text); if (msgEl) msgEl.textContent = "Copied. Paste it in your group chat."; return true; }
+  catch { if (fallbackEl) { fallbackEl.focus(); fallbackEl.select(); } if (msgEl) msgEl.textContent = "Select the text and copy it."; return false; }
+}
+
+$("dailyBtn").onclick = () => {
+  const rec = P.daily[todayKey()];
+  if (!validDay(rec)) { startDaily(); return; }
+  copyText(shareText(todayKey(), rec)).then(ok => {
+    $("dailyBtn").textContent = ok ? "Copied" : "Open the Friends board to compare";
+    setTimeout(renderDaily, 2500);
+  });
+};
+$("copyBtn").onclick = () => copyText($("shareText").value, $("copyMsg"), $("shareText"));
+setInterval(() => { if (!$("dailyCard").hidden) renderDaily(); }, 60000);
+
+const boardMode = () => (document.querySelector('input[name="boardMode"]:checked') || {}).value || "stamps";
+for (const el of document.querySelectorAll('input[name="boardMode"]')) el.addEventListener("change", renderBoard);
 
 /* ---------- Tabs ---------- */
 let tab = "fly", flyScreen = "setup";
 function paint() {
   for (const s of ["setup", "play", "done", "postcard"]) $(s).hidden = !(tab === "fly" && s === flyScreen);
+  $("dailyCard").hidden = !(tab === "fly" && flyScreen === "setup");
   $("passportView").hidden = tab !== "passport";
   $("boardView").hidden = tab !== "board";
   for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
@@ -1621,6 +1769,7 @@ function factFor(d, which) {
 }
 
 function refreshSetup() {
+  renderDaily();
   const c = readCfg();
   const list = pool(c);
   $("poolCount").textContent = c.len ? Math.min(c.len, list.length) : list.length;
@@ -1681,14 +1830,18 @@ function ask() {
   if (cfg.style === "choice") {
     $("typed").hidden = true;
     $("opts").hidden = false;
-    const same = shuffle(DATA.filter(d => d !== q && d.region === q.region));
-    const rest = shuffle(DATA.filter(d => d !== q && d.region !== q.region));
-    const picks = [q];
-    for (const d of same.concat(rest)) {
-      if (picks.length === 4) break;
-      if (!picks.some(p => label(p) === label(d))) picks.push(d);
+    let picks;
+    if (S.opts) picks = S.opts[S.i];
+    else {
+      const same = shuffle(DATA.filter(d => d !== q && d.region === q.region));
+      const rest = shuffle(DATA.filter(d => d !== q && d.region !== q.region));
+      picks = [q];
+      for (const d of same.concat(rest)) {
+        if (picks.length === 4) break;
+        if (!picks.some(p => label(p) === label(d))) picks.push(d);
+      }
+      shuffle(picks);
     }
-    shuffle(picks);
     $("opts").innerHTML = "";
     picks.forEach((d, i) => {
       const b = document.createElement("button");
@@ -1772,6 +1925,10 @@ function answer(correct, btn) {
     main.textContent = `The capital of ${q.country} is ${q.capital}.` + (S.prev ? ` You stay in ${S.prev.capital}.` : "") + " It will come back in your next trips.";
     P.review[q.country] = { box: 0, due: P.trips + 2 };
   }
+  if (S.daily) {
+    S.marks += correct ? "1" : "0";
+    P.daily[S.daily] = { score: S.score, marks: S.marks, ms: Date.now() - S.t0, done: S.marks.length === S.deck.length };
+  }
   savePassport();
   fb.appendChild(main);
   if (q.note) {
@@ -1825,24 +1982,29 @@ function finish() {
     for (const f of FACTS[m.country] || []) { const p = document.createElement("p"); p.textContent = f; li.appendChild(p); }
     list.appendChild(li);
   }
-  const missed = S.misses.slice();
+  const missed = S.daily ? [] : S.misses.slice();
+  $("dailyShare").hidden = !S.daily;
+  $("againBtn").hidden = !!S.daily;
+  $("changeBtn").textContent = S.daily ? "Back to check-in" : "Change route";
+  if (S.daily) { $("shareText").value = shareText(S.daily, P.daily[S.daily]); $("copyMsg").textContent = ""; }
   $("retryBtn").hidden = !missed.length;
   $("retryBtn").textContent = missed.length === 1 ? "Retry this one now" : `Retry ${missed.length} missed now`;
   $("retryBtn").onclick = () => startTrip(cfg, missed);
   $("againBtn").classList.toggle("ghost", missed.length > 0);
   const key = cfgKey(cfg);
   const prevBest = store.get(key);
-  const isRecord = !S.retry && (!prevBest || S.score / total > prevBest.score / prevBest.total);
+  const isRecord = !S.retry && !S.daily && (!prevBest || S.score / total > prevBest.score / prevBest.total);
   if (isRecord) store.set(key, { score: S.score, total });
   const best = isRecord ? { score: S.score, total } : prevBest;
-  $("dBest").textContent = best ? `${best.score}/${best.total} boarded` : "–";
+  $("dBestLabel").textContent = S.daily ? "Daily streak" : "Best on this route";
+  $("dBest").textContent = S.daily ? `${dailyStreak(P.daily)} ${dailyStreak(P.daily) === 1 ? "day" : "days"}` : best ? `${best.score}/${best.total} boarded` : "–";
   const pct = S.score / total;
   $("doneStamp").innerHTML = `<div class="stamp ${pct >= .7 ? "good" : "bad"}">${pct === 1 ? "Perfect trip" : pct >= .7 ? "Welcome home" : "Rebook"}<small>${stampCount(P.stamps)}/${TOTAL} stamps</small></div>`;
   const last = S.prev && S.prev.country;
   $("doneCard").hidden = !last;
   if (last) { $("doneCard").textContent = `Postcard from ${S.prev.capital}`; $("doneCard").onclick = () => openPostcard(last); }
   show("done");
-  (missed.length ? $("retryBtn") : $("againBtn")).focus();
+  (S.daily ? $("copyBtn") : missed.length ? $("retryBtn") : $("againBtn")).focus();
 }
 
 $("setupForm").addEventListener("submit", e => { e.preventDefault(); startTrip(readCfg()); });
