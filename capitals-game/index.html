@@ -13,6 +13,7 @@
   --line:#C6D0DB; --accent:#2346C8; --accent-ink:#FFFFFF; --accent-soft:#E2E8FA;
   --good:#1B7447; --good-soft:#E0F1E7; --bad:#B3302A; --bad-soft:#F8E2E0;
   --shadow:0 1px 0 rgba(20,35,58,.05), 0 18px 40px -18px rgba(20,35,58,.35);
+  --r-africa:#B0561A; --r-americas:#1B7447; --r-asia:#B3302A; --r-europe:#2346C8; --r-oceania:#7A3FA8;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"Barlow","Helvetica Neue",Arial,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -24,6 +25,7 @@
     --line:#2E3D54; --accent:#8AA2FF; --accent-ink:#0D1520; --accent-soft:#22305A;
     --good:#5BCB8E; --good-soft:#173628; --bad:#FF8A80; --bad-soft:#3F1F22;
     --shadow:0 18px 40px -18px rgba(0,0,0,.7);
+    --r-africa:#F0A060; --r-americas:#6BD39A; --r-asia:#FF8A80; --r-europe:#8AA2FF; --r-oceania:#C89BF0;
     color-scheme:dark;
   }
 }
@@ -32,6 +34,7 @@
   --line:#2E3D54; --accent:#8AA2FF; --accent-ink:#0D1520; --accent-soft:#22305A;
   --good:#5BCB8E; --good-soft:#173628; --bad:#FF8A80; --bad-soft:#3F1F22;
   --shadow:0 18px 40px -18px rgba(0,0,0,.7);
+  --r-africa:#F0A060; --r-americas:#6BD39A; --r-asia:#FF8A80; --r-europe:#8AA2FF; --r-oceania:#C89BF0;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -123,7 +126,58 @@ legend{padding:0;margin-bottom:8px}
 .foot{color:var(--muted);font-size:13px;text-align:center}
 .foot kbd{font:600 12px var(--mono);padding:1px 5px;border:1px solid var(--line);border-radius:4px;background:var(--ticket)}
 
+/* Tabs */
+.nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--ticket);border:1px solid var(--line);border-radius:999px;max-width:100%;overflow-x:auto}
+.tab{flex:none;border:0;background:transparent;padding:9px 16px;border-radius:999px;font:700 14px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.sync{display:flex;align-items:center;gap:8px;margin:0;font-size:13px;color:var(--muted)}
+.sync::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--line)}
+.sync[data-state="live"]::before{background:var(--good)}
+.sync[data-state="readonly"]::before{background:var(--bad)}
+
+/* Passport */
+.book{background:var(--ticket);border-radius:16px;box-shadow:var(--shadow);padding:22px 26px 26px;display:grid;gap:22px;min-width:0}
+.book-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.book-head h2{margin:4px 0 0;font:800 clamp(28px,5vw,38px)/1 var(--display);text-transform:uppercase;text-wrap:balance}
+.tally{text-align:right}
+.tally b{display:block;font:700 40px/1 var(--mono);font-variant-numeric:tabular-nums}
+.tally span{color:var(--muted);font-size:14px}
+.region-block{display:grid;gap:10px}
+.region-block h3{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0;font:700 16px/1 var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--r)}
+.region-block h3 span{font:600 13px var(--mono);letter-spacing:0;color:var(--muted)}
+.stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px}
+.st{min-height:58px;padding:6px 8px;border:1.5px dashed var(--line);border-radius:8px;display:grid;align-content:center;text-align:center;font-size:12px;line-height:1.2;color:var(--muted);opacity:.7;overflow-wrap:anywhere}
+.st.on{opacity:1;border:2px solid var(--r);color:var(--r);font-weight:600;transform:rotate(var(--rot));background:var(--ticket)}
+.st.on b{display:block;font:700 14px/1.1 var(--mono);letter-spacing:.06em}
+.st.on small{display:block;margin-top:2px;font:500 10px var(--mono);letter-spacing:.04em;opacity:.85}
+.mrz{margin:0;padding:12px 14px;background:var(--stub);border-radius:8px;font:500 13px/1.6 var(--mono);letter-spacing:.14em;color:var(--muted);overflow-x:auto;white-space:pre}
+.africa{--r:var(--r-africa)}.americas{--r:var(--r-americas)}.asia{--r:var(--r-asia)}.europe{--r:var(--r-europe)}.oceania{--r:var(--r-oceania)}
+
+.region-list{display:grid;gap:24px}
+
+/* Board */
+.board-note{margin:0;color:var(--muted);font-size:15px;max-width:65ch}
+.table-wrap{overflow-x:auto}
+.board{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.board th{padding:0 10px 10px;text-align:left;font:600 11px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.board td{padding:12px 10px;border-top:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+.board .num{text-align:right;font-family:var(--mono)}
+.board .rank{font:700 20px/1 var(--mono);width:44px}
+.board tr.me td{background:var(--accent-soft)}
+.who{display:flex;align-items:center;gap:10px;font-weight:600}
+.who img{width:30px;height:30px;border-radius:50%;flex:none}
+.pill{padding:2px 8px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:700 11px/1.4 var(--display);letter-spacing:.1em;text-transform:uppercase}
+.pill.gold{background:var(--r-africa);color:var(--ticket)}
+.meter{display:flex;align-items:center;gap:10px;min-width:170px}
+.meter b{font:700 16px var(--mono)}
+.bar{flex:1;height:6px;border-radius:3px;background:var(--stub);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.empty{padding:18px 0;color:var(--muted)}
+
 @media (max-width:700px){
+  .book{padding:18px 18px 20px}
   .ticket{grid-template-columns:minmax(0,1fr)}
   .stub{border-left:0;border-top:2px dashed var(--line);border-radius:0 0 16px 16px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center}
   .stub::before,.stub::after{top:-13px;bottom:auto}
@@ -134,7 +188,7 @@ legend{padding:0;margin-bottom:8px}
   .setup-grid{grid-template-columns:minmax(0,1fr)}
   .summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-@media (max-width:460px){ .opts{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:460px){ .opts{grid-template-columns:minmax(0,1fr)} .tab{padding:9px 10px;letter-spacing:.05em;font-size:13px} }
 @media (prefers-reduced-motion: reduce){ .stamp{animation:none} .opt{transition:none} }
 </style>
 </head>
@@ -152,6 +206,15 @@ legend{padding:0;margin-bottom:8px}
       <div class="stat"><span>Km flown</span><b id="sKm">0</b></div>
     </div>
   </header>
+
+  <nav class="nav" aria-label="Sections">
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-fly" data-tab="fly" aria-selected="true">Fly</button>
+      <button class="tab" role="tab" id="tab-passport" data-tab="passport" aria-selected="false">My passport</button>
+      <button class="tab" role="tab" id="tab-board" data-tab="board" aria-selected="false">Friends board</button>
+    </div>
+    <p class="sync" id="sync" data-state="local">Saved on this device</p>
+  </nav>
 
   <!-- Setup -->
   <section id="setup" class="ticket setup" aria-label="Plan your trip">
@@ -240,7 +303,7 @@ legend{padding:0;margin-bottom:8px}
       <div class="summary-grid">
         <div><span class="label">Boarded</span><b id="dScore">0/0</b></div>
         <div><span class="label">Accuracy</span><b id="dAcc">0%</b></div>
-        <div><span class="label">Best streak</span><b id="dStreak">0</b></div>
+        <div><span class="label">New stamps</span><b id="dNew">0</b></div>
         <div><span class="label">Km flown</span><b id="dKm">0</b></div>
       </div>
       <div>
@@ -259,7 +322,31 @@ legend{padding:0;margin-bottom:8px}
     </aside>
   </section>
 
-  <p class="foot">Keys: <kbd>1</kbd>–<kbd>4</kbd> pick an answer, <kbd>Enter</kbd> next flight. Distances are great-circle km between capitals.</p>
+  <!-- Passport -->
+  <section id="passportView" class="book" aria-label="My passport" hidden>
+    <div class="book-head">
+      <div><span class="label">Passport · Capital Air frequent flyer</span><h2 id="holder">Traveller</h2></div>
+      <div class="tally"><b id="pCount">0/194</b><span>stamps · <span id="pMeta">0 flights</span></span></div>
+    </div>
+    <div id="pRegions" class="region-list"></div>
+    <pre class="mrz" id="mrz" aria-label="Machine readable zone"></pre>
+  </section>
+
+  <!-- Leaderboard -->
+  <section id="boardView" class="book" aria-label="Friends board" hidden>
+    <div class="book-head">
+      <div><span class="label">Departures · ranked by stamps</span><h2>Friends board</h2></div>
+    </div>
+    <p class="board-note" id="boardNote">You earn a stamp the first time you name a country's capital correctly. The passport with the most stamps leads. Ties go to whoever has boarded more flights.</p>
+    <div class="table-wrap">
+      <table class="board">
+        <thead><tr><th>#</th><th>Traveller</th><th>Stamps</th><th class="num">Boarded</th><th class="num">Accuracy</th><th class="num">Km flown</th><th class="num">Best streak</th></tr></thead>
+        <tbody id="boardBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="foot">Stamps and scores sync to the friends board on the shared page. Keys: <kbd>1</kbd>–<kbd>4</kbd> pick an answer, <kbd>Enter</kbd> next flight. Distances are great-circle km between capitals.</p>
 </div>
 
 <script>
@@ -485,6 +572,7 @@ const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
+const dayMonth = t => new Date(t).toLocaleDateString("en-GB", { day: "2-digit", month: "short" }).toUpperCase();
 
 function km(a, b) {
   const R = 6371, rad = Math.PI / 180;
@@ -493,11 +581,186 @@ function km(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
+const TOTAL = DATA.length;
+const BY_COUNTRY = Object.fromEntries(DATA.map(d => [d.country, d]));
 const REGIONS = ["All", "Africa", "Americas", "Asia", "Europe", "Oceania"];
 $("segRegion").innerHTML = REGIONS.map((r, i) =>
   `<input type="radio" name="region" id="reg${r}" value="${r}"${i ? "" : " checked"}><label for="reg${r}">${r}</label>`
 ).join("");
 
+/* ---------- Passport: saved locally, synced to the shared board when available ---------- */
+const blankPassport = () => ({ stamps: {}, flights: 0, boarded: 0, km: 0, bestStreak: 0, trips: 0 });
+const localP = store.get("capdep-passport");
+let P = Object.assign(blankPassport(), localP && typeof localP === "object" ? localP : {});
+const net = { db: null, user: null, id: null, ref: null, name: "", writable: true, saving: false, dirty: false, board: [] };
+
+// Shared data is written by other viewers: only count stamps for real countries.
+const stampCount = stamps => Object.keys(stamps || {}).filter(k => BY_COUNTRY[k]).length;
+
+function passportBody() {
+  return {
+    stamps: P.stamps, stampCount: stampCount(P.stamps), flights: P.flights, boarded: P.boarded,
+    km: Math.round(P.km), bestStreak: P.bestStreak, trips: P.trips, updatedAt: Date.now()
+  };
+}
+
+function mergeRemote(d) {
+  const m = blankPassport();
+  const remote = d.stamps && typeof d.stamps === "object" ? d.stamps : {};
+  m.stamps = { ...remote };
+  for (const [k, t] of Object.entries(P.stamps)) m.stamps[k] = remote[k] ? Math.min(remote[k], t) : t;
+  for (const f of ["flights", "boarded", "km", "bestStreak", "trips"]) m[f] = Math.max(+d[f] || 0, +P[f] || 0);
+  return m;
+}
+
+async function flush() {
+  if (!net.ref || !net.writable) return;
+  if (net.saving) { net.dirty = true; return; }
+  net.saving = true;
+  try {
+    await net.ref.set(passportBody());
+  } catch (e) {
+    if (e && (e.code === "invalid_argument" || e.code === "revoked" || e.code === "not_granted")) { net.writable = false; setSync(); }
+  }
+  net.saving = false;
+  if (net.dirty) { net.dirty = false; flush(); }
+}
+
+function savePassport() {
+  store.set("capdep-passport", P);
+  flush();
+  renderPassport();
+  renderBoard();
+}
+
+function setSync() {
+  const el = $("sync");
+  if (net.ref && net.writable) { el.dataset.state = "live"; el.textContent = "Passport synced with the friends board"; }
+  else if (net.ref) { el.dataset.state = "readonly"; el.textContent = "View only: ask the owner for edit access to save stamps"; }
+  else { el.dataset.state = "local"; el.textContent = "Saved on this device only"; }
+}
+
+async function connect() {
+  if (!window.claude || typeof window.claude.use !== "function") return;
+  const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+  net.user = user;
+  if (!db || !user) return;
+  const id = await user.id();
+  if (!id) return;
+  net.db = db; net.id = id;
+  net.name = (await user.me()).name || "";
+  net.ref = db.doc("passports/" + id);
+  const before = stampCount(P.stamps);
+  let remoteCount = -1;
+  try {
+    const snap = await net.ref.get();
+    if (snap.exists) { remoteCount = stampCount(snap.data().stamps); P = mergeRemote(snap.data()); }
+  } catch {}
+  store.set("capdep-passport", P);
+  setSync();
+  // Carry over stamps earned on this device before the passport was synced.
+  if (before && stampCount(P.stamps) > remoteCount) flush();
+  db.collection("passports").orderBy("stampCount", "desc").limit(200).onSnapshot(
+    s => { net.board = s.docs.map(d => ({ id: d.id, ...d.data() })); renderBoard(); },
+    () => {}
+  );
+  renderPassport();
+  renderBoard();
+}
+
+/* ---------- Passport view ---------- */
+function renderPassport() {
+  const n = stampCount(P.stamps);
+  $("holder").textContent = net.name || "Traveller";
+  $("pCount").textContent = `${n}/${TOTAL}`;
+  $("pMeta").textContent = `${fmt(P.flights)} flights · ${fmt(P.km)} km`;
+  const wrap = $("pRegions");
+  wrap.innerHTML = "";
+  let idx = 0;
+  for (const region of REGIONS.slice(1)) {
+    const list = DATA.filter(d => d.region === region);
+    const got = list.filter(d => P.stamps[d.country]).length;
+    const block = document.createElement("div");
+    block.className = "region-block " + region.toLowerCase();
+    block.innerHTML = `<h3>${region}<span>${got}/${list.length}</span></h3><div class="stamps"></div>`;
+    const grid = block.lastChild;
+    for (const d of list) {
+      const el = document.createElement("div");
+      const t = P.stamps[d.country];
+      el.className = "st" + (t ? " on" : "");
+      if (t) {
+        el.style.setProperty("--rot", `${((idx * 37) % 15) - 7}deg`);
+        el.innerHTML = "<b></b><span></span><small></small>";
+        el.children[0].textContent = code(d.capital);
+        el.children[1].textContent = d.country;
+        el.children[2].textContent = dayMonth(t);
+        el.title = `${d.capital}, ${d.country}`;
+      } else {
+        el.textContent = d.country;
+      }
+      grid.appendChild(el);
+      idx++;
+    }
+    wrap.appendChild(block);
+  }
+  const holder = (norm(net.name || "traveller").toUpperCase() || "TRAVELLER");
+  const line1 = ("P<CAP" + holder + "<<FREQUENT<FLYER").padEnd(44, "<").slice(0, 44);
+  const line2 = (`STAMPS${String(n).padStart(3, "0")}<${TOTAL}<<FLIGHTS${P.flights}<<KM${Math.round(P.km)}`).padEnd(44, "<").slice(0, 44);
+  $("mrz").textContent = line1 + "\n" + line2;
+}
+
+/* ---------- Friends board ---------- */
+let boardToken = 0;
+async function renderBoard() {
+  const token = ++boardToken;
+  const myId = net.id || "me";
+  const rows = net.board
+    .filter(r => r.id !== myId)
+    .map(r => ({ ...r, count: stampCount(r.stamps) }));
+  rows.push({ id: myId, ...passportBody(), count: stampCount(P.stamps), me: true });
+  rows.sort((a, b) => b.count - a.count || (+b.boarded || 0) - (+a.boarded || 0));
+
+  let people = {};
+  if (net.user && net.id) people = await net.user.profiles(rows.map(r => r.id));
+  if (token !== boardToken) return;
+
+  const body = $("boardBody");
+  body.innerHTML = "";
+  rows.forEach((r, i) => {
+    const p = people[r.id];
+    const tr = document.createElement("tr");
+    if (r.me) tr.className = "me";
+    const flights = +r.flights || 0, boarded = +r.boarded || 0;
+    tr.innerHTML = `
+      <td class="rank">${i + 1}</td>
+      <td><div class="who">${p ? `<img alt="" src="">` : ""}<span class="nm"></span>${r.me && ((p && p.name) || net.name) ? '<span class="pill">You</span>' : ""}${i === 0 && r.count > 0 ? '<span class="pill gold">Top passport</span>' : ""}</div></td>
+      <td><div class="meter"><b>${r.count}</b><div class="bar"><i style="width:${(100 * r.count / TOTAL).toFixed(1)}%"></i></div></div></td>
+      <td class="num">${fmt(boarded)}</td>
+      <td class="num">${flights ? Math.round(100 * boarded / flights) + "%" : "–"}</td>
+      <td class="num">${fmt(+r.km || 0)}</td>
+      <td class="num">${fmt(+r.bestStreak || 0)}</td>`;
+    if (p) tr.querySelector("img").src = p.avatarUrl;
+    tr.querySelector(".nm").textContent = (p && p.name) || (r.me ? (net.name || "You") : "Traveller");
+    body.appendChild(tr);
+  });
+
+  const note = $("boardNote");
+  const base = "You earn a stamp the first time you name a country's capital correctly. The passport with the most stamps leads. Ties go to whoever has boarded more flights.";
+  note.textContent = net.ref ? base : base + " Only your own passport shows here. Open the shared Capital Departures page to compete with friends.";
+}
+
+/* ---------- Tabs ---------- */
+let tab = "fly", flyScreen = "setup";
+function paint() {
+  for (const s of ["setup", "play", "done"]) $(s).hidden = !(tab === "fly" && s === flyScreen);
+  $("passportView").hidden = tab !== "passport";
+  $("boardView").hidden = tab !== "board";
+  for (const b of document.querySelectorAll(".tab")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
+}
+for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => { tab = b.dataset.tab; paint(); });
+function show(id) { flyScreen = id; tab = "fly"; paint(); }
+
+/* ---------- Game ---------- */
 let cfg, S;
 
 function readCfg() {
@@ -509,21 +772,18 @@ const pool = c => DATA.filter(d => c.region === "All" || d.region === c.region);
 
 function refreshSetup() {
   const c = readCfg();
-  const n = pool(c).length;
-  $("poolCount").textContent = c.len ? Math.min(c.len, n) : n;
+  const list = pool(c);
+  $("poolCount").textContent = c.len ? Math.min(c.len, list.length) : list.length;
   const best = store.get(cfgKey(c));
-  $("bestLine").textContent = best ? `${best.score}/${best.total} boarded` : "No trips yet";
+  const missing = list.filter(d => !P.stamps[d.country]).length;
+  $("bestLine").textContent = (best ? `${best.score}/${best.total} boarded` : "No trips yet") + ` · ${missing} unstamped here`;
 }
 $("setupForm").addEventListener("change", refreshSetup);
-
-function show(id) {
-  for (const s of ["setup", "play", "done"]) $(s).hidden = s !== id;
-}
 
 function startTrip(c) {
   cfg = c;
   const deck = shuffle(pool(c).slice());
-  S = { deck: c.len ? deck.slice(0, c.len) : deck, i: 0, score: 0, streak: 0, best: 0, km: 0, prev: null, misses: [], answered: false };
+  S = { deck: c.len ? deck.slice(0, c.len) : deck, i: 0, score: 0, streak: 0, best: 0, km: 0, prev: null, misses: [], fresh: 0, answered: false };
   show("play");
   ask();
 }
@@ -550,7 +810,8 @@ function ask() {
   $("fRegion").textContent = q.region;
   $("askLabel").textContent = c2k ? "Country" : "Capital";
   $("ask").textContent = c2k ? q.country : q.capital;
-  $("askHint").textContent = c2k ? "Which city is its capital?" : "Which country is this the capital of?";
+  $("askHint").textContent = (c2k ? "Which city is its capital?" : "Which country is this the capital of?") +
+    (P.stamps[q.country] ? " Already stamped." : " Not in your passport yet.");
   $("stLeg").textContent = `${S.i + 1} / ${S.deck.length}`;
   $("stDist").textContent = "Revealed on landing";
   $("stampSlot").innerHTML = "";
@@ -624,11 +885,16 @@ function answer(correct, btn) {
   const fb = $("feedback");
   fb.innerHTML = "";
   const main = document.createElement("span");
+  P.flights++;
   if (correct) {
     S.score++; S.streak++; S.best = Math.max(S.best, S.streak); S.km += dist;
+    const isNew = !P.stamps[q.country];
+    if (isNew) { P.stamps[q.country] = Date.now(); S.fresh++; }
+    P.boarded++; P.km += dist; P.bestStreak = Math.max(P.bestStreak, S.streak);
     stamp.className = "stamp good";
-    stamp.innerHTML = `Boarded<small>${code(q.capital)} · ${new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short" }).toUpperCase()}</small>`;
-    main.textContent = c2k ? `Correct. ${q.capital} is the capital of ${q.country}.` : `Correct. ${q.capital} is in ${q.country}.`;
+    stamp.innerHTML = `${isNew ? "New stamp" : "Boarded"}<small>${code(q.capital)} · ${dayMonth(Date.now())}</small>`;
+    main.textContent = (c2k ? `Correct. ${q.capital} is the capital of ${q.country}.` : `Correct. ${q.capital} is in ${q.country}.`) +
+      (isNew ? ` Stamped: ${stampCount(P.stamps)}/${TOTAL} in your passport.` : "");
     S.prev = q;
   } else {
     S.streak = 0;
@@ -637,6 +903,7 @@ function answer(correct, btn) {
     stamp.innerHTML = `Missed<small>Gate closed</small>`;
     main.textContent = `The capital of ${q.country} is ${q.capital}.` + (S.prev ? ` You stay in ${S.prev.capital}.` : "");
   }
+  savePassport();
   fb.appendChild(main);
   if (q.note) {
     const n = document.createElement("span");
@@ -658,9 +925,11 @@ function next() {
 
 function finish() {
   const total = S.deck.length;
+  P.trips++;
+  savePassport();
   $("dScore").textContent = `${S.score}/${total}`;
   $("dAcc").textContent = `${Math.round(100 * S.score / total)}%`;
-  $("dStreak").textContent = S.best;
+  $("dNew").textContent = S.fresh;
   $("dKm").textContent = fmt(S.km);
   const list = $("misses");
   list.innerHTML = "";
@@ -684,7 +953,7 @@ function finish() {
   const best = isRecord ? { score: S.score, total } : prevBest;
   $("dBest").textContent = `${best.score}/${best.total} boarded`;
   const pct = S.score / total;
-  $("doneStamp").innerHTML = `<div class="stamp ${pct >= .7 ? "good" : "bad"}">${pct === 1 ? "Perfect trip" : pct >= .7 ? "Welcome home" : "Rebook"}<small>${isRecord && prevBest ? "New route record" : `${Math.round(pct * 100)}% on time`}</small></div>`;
+  $("doneStamp").innerHTML = `<div class="stamp ${pct >= .7 ? "good" : "bad"}">${pct === 1 ? "Perfect trip" : pct >= .7 ? "Welcome home" : "Rebook"}<small>${stampCount(P.stamps)}/${TOTAL} stamps</small></div>`;
   show("done");
   $("againBtn").focus();
 }
@@ -703,7 +972,7 @@ $("againBtn").onclick = () => startTrip(cfg);
 $("changeBtn").onclick = () => { S = null; updateStats(); refreshSetup(); show("setup"); };
 
 document.addEventListener("keydown", e => {
-  if ($("play").hidden || !S || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (tab !== "fly" || flyScreen !== "play" || !S || e.metaKey || e.ctrlKey || e.altKey) return;
   if (!S.answered && cfg.style === "choice" && /^[1-4]$/.test(e.key)) {
     const b = $("opts").children[+e.key - 1];
     if (b) b.click();
@@ -713,7 +982,13 @@ document.addEventListener("keydown", e => {
   }
 });
 
+if (["passport", "board"].includes(location.hash.slice(1))) tab = location.hash.slice(1);
+paint();
 refreshSetup();
+renderPassport();
+renderBoard();
+setSync();
+connect().then(refreshSetup);
 </script>
 </body>
 </html>
